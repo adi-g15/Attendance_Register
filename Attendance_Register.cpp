@@ -1,9 +1,8 @@
 # 29 "Records_with_TT.cpp"
+/*Comments have been removed from this file, to see the actual code with 'all', see the other Records_TT.cpp 
+And due to removing comments, their are many newlines
+*/
 #include <iostream>
-
-
-
-
 
 #include <fstream>
 # 45 "Records_with_TT.cpp"
@@ -276,38 +275,6 @@ int main(int argc, char const *argv[]){
  listbox all_records;
  all_records.table.mainmenu();
 
-
- prt_t_header();
- greeting(name);
- if(terminal_width<115){
-  std::cout<<'\n';
- }
- else std::cout<<"\n\n";
- for(i=0;i<(terminal_width/2 - 3); i++) std::cout<<' ';
- getline( std::cin, icommand );
- if(icommand[0] == ':' ){
-  if ( icommand == ":exit" )
-   return 0;
-# 354 "Records_with_TT.cpp"
- }
- else {
-  try{
-
-  }
-  catch(char *s){
-   std::cout<<s;
-  }
-
-
-  system("clear");
-  prt_t_header();
-  greeting(name);
-  if(terminal_width<115){
-   std::cout<<'\n';
-  }
-  else std::cout<<"\n\n";
-  vibrate("Records Updated!");
- }
 }
 
 
