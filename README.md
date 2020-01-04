@@ -1,5 +1,5 @@
 #Currently halted, and only Timetable_Manager is working, due to an error in code
-# Atttendance_Register
+# Attendance_Register
 A Project, that basically takes care of your attendance, at the same time, it's quite advanced due to a strong foundation by the 'TimetableManager', more in ReadMe
 1. All basic functionalities for a Attendance_Register (stores and processing records)
 2. Supports following shortcuts : 
