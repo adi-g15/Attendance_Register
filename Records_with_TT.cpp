@@ -1,3 +1,5 @@
+//TODO - Read all FUTURE and NOTE comments
+
 /*Future - Collect Timetables of all branches, ask in start & change name of recallfile accordingly*/
 /*Future- Add special_notes for particular 'dates'*/
 //SUGGESTION - Set 'day' in daylist, using today's day, from the parent, ie. timetable, since, that will require only 1 refresh of time, and will set the day for all 5 daylists [or ndays]
@@ -47,6 +49,10 @@ FUTURE - "Any Special notes for this day (1 or 0)? ";*/
 #include <cstdlib>		//For using system("clear") only once
 #include <limits>	//for std::numeric_limits
 //#include <ios>	//for <std::streamsize>, both these used in std::cin.ignore()
+#include<vector>
+#include<list>
+#include<cmath>
+#include<algorithm>
 
 #ifdef _WIN32	//Macro defined by MSVC (Microsoft Visual C++) compiler (not g++)
 	#include <windows.h>
@@ -80,7 +86,7 @@ typedef unsigned int positive;
 /*[5/12/2019 16:57] A drastic shift - In original idea, we actually demanded user to enter start and end time, for all intervals, 
 					But I replaced it by having the program ask only for coursecode, and leave the time interval if empty
 					This may increase convinience on user side, but DECREASES THE ABILITY TO HAVE CUSTOM TIME RANGES
-					Change - Removed fillbox() from timeboxn class, and implemented the above said in parent daylist class*/
+					Change - Removed fillbox() from timebox class, and implemented the above said in parent daylist class*/
 
 /*Improvements IMPLEMENTED [Some of them may have been lost, ya maine sirf mann me sochha tha, and didn't write it here, and such improvements might have been implemented in a day or so]*/
 //[DONE]FUTURE - Range changes according to the Height of Terminal Window
@@ -108,72 +114,24 @@ struct strnode{
 		strnode* next= NULL ;
 };
 
-class string_list{
-public:
-	strnode *front, *rear;	//For now, LET THEM PUBLIC... required in listbox::initiate()
-	bool is_in_list(string);	//true IF found
-	void add_in_list(string);
-	void destruct_list();
-	string_list(){
-		front = NULL;
-		rear = NULL;
-	}
-	~string_list(){
-		destruct_list();
-	}
-};
-//string Class Functions START
-bool string_list::is_in_list(string s){
-	strnode* tmp = front;
-	while(tmp->next){
-		if(tmp->s == s){
-			destruct_list();
-			return true;
-		}
-	}
-	destruct_list();
-	return false;
-}
-
-void string_list::add_in_list(string str){
-	strnode *newnode = new strnode;
-	newnode->s = str;
-	if(front == NULL){
-		front = newnode;
-		rear= newnode;	//newnode->next is already NULL
-	}
-	else {
-		newnode->next = front;
-		front = newnode;
-	}
-}
-
-void string_list::destruct_list(){
-	strnode *temp = front;
-	while(front){
-		temp=front;
-		front = temp->next;
-		delete temp;
-	}
-}
-//string Class Functions END
-
-class timeboxn{
+class timebox{
 	string coursecode;
 //	irecbox *recbox;
 	public:
-		string sub;	//parent fills the times, and sub
+		bool box_type;	//0 for recess, 1 for class(default)
+		string sub;
         float starttime,endtime;  //store 9:30 as 9.5 & 1:30 pm as 13.5... ie. in 24-HOUR FORMAT
 					//Auto assume am for any time (6,12), and for all others 'pm'
-    	timeboxn *next,*prev;
+//    	timebox *next,*prev;
 		
-    	timeboxn();
+    	timebox();
 //        void fillbox();	//have this fillbox in its parent, and there dont ask user to enter time also, just keep taking input for different intervals, let user leave it blank, if empty period
-        string* get_coursecode();
-        void change_coursecode(string*);
+        /*const */string get_coursecode(void);
+        void change_coursecode(string);
 //Added on 25 December 2019
         void change_coursecode(char*);	//Used ONLY in daylist::load_from_binary()...
         								//CAN BE REMOVED ONCE daylist::append_box() is utilized
+		void set_sub(void);
 };
 
 class daylist{
@@ -181,15 +139,15 @@ class daylist{
 			/*PROPOSED CHANGES - Utilize append_box() in load_from_binary... first check if it is LAB course or not, then call append_box()
 			*/
 	string day;	//let the parent fill this, and in capitals
-	timeboxn *front,*rear;
+	std::vector<timebox> timelist;
+	static float class_start, class_end, class_length, recess_start, recess_end;	//class_length seems more connected to timetable class
 	public:
-	    timeboxn *tpoints[8]={ NULL };	//WARNING - If wanting to dynamically allocate, change timetable::set_total_courses().. No need to dynamically allocate though
-		int numbox;
-
+	    vector</*const */timebox*> tpoints;	//IMP_NOTE - THE CONST IS HIGHLY PROBLEMATIC HERE!
+//DECIDED_COMMENT - //WARNING - If wanting to dynamically allocate tpoints, change timetable::set_total_courses().. No need to dynamically allocate though
 		void set_tpoints();
+		void show_tpoints();	//FOR DEBUG PURPOSES
 		void make_tlist();
-		void append_box(string*,int);	//By Default, appends to end
-		timeboxn* traverseto(int);	//Will traverse like array (ie. 0 means 1st box)
+		void make_sample_tlist(void);
 //Added on 25 DECEMBER 2019, after >7 days try
 		void load_from_binary(std::ifstream*); //also calls set_tpoints() at end
 		void save_to_binary(std::ofstream*);
@@ -197,28 +155,48 @@ class daylist{
 //Suggested on 26 DECEMBER 2019
 //		bool isLabCourse(string);
 		void update_box(int);	//Takes the number of box... then utilize tpoints[8]
+		void reset_records(void);	//to be used before loading from file
 		daylist();
 		~daylist();                   
 };
+
+void daylist::reset_records(){
+	day.clear();
+	timelist.clear();
+	tpoints.clear();
+	class_start = 8,5;
+	class_end = 17.5;
+	class_length = 1;
+	recess_start = 12.5;
+	recess_end = 13.5;
+}
+
+void daylist::show_tpoints(){
+	for( const timebox* box : tpoints){
+		cout<<box->get_coursecode();
+		cout<<endl;
+	}
+}
 
 class timetable{
 	bool state;		//'state' data member tells if it has been entered or not
 	string savefile,txtfile,recallfile;	//Change these to department name + gp name, after user changes dept or grp
 	string dept,grp;
-	daylist *day;
+	vector<daylist> day;	//UPDATE_NOTE - Using vectors makes it easier to accomodate Saturdays and Sundays
 	public:		/*Future - Add functionality for 'n' temp-timetables (each for 1 day)... These will store Day,Date,Sub,time */
 		int ndays;	//For the basic part, don't change 'ndays'
 					//Made it public, so that a_register::update_num_courses() can access it
 		int total_courses;	/*DONT RECOVER FROM CONFIG... let the functions auto-set this*/
 		daylist* ret_day(int);		//int from 0 to 6 (or ndays)
-		string** contoarray(void);	//Deprecated... using tpointers to get values
+		vector<vector<string>> contoarray(void);	//Deprecated... using tpointers to get values
 //Added29th December, but all my work of 29th December was gone! So rewrote on 30th
-		string_list distinct_courses;	//Use set_total_courses()
+		vector<string> distinct_courses;	//Use set_total_courses()
 //[Replaced]        void save(void);
 		void savetxt(void);
-		void display(void);	//can utilize the display(int) function
+		void display(void);	//change due to generalization
 //[Replaced]		void loadfrom_file(void);
 		void fill(void);
+		void sample_fill(void);
 		void settings(void);
 //27 December 2019... made mainmenu() take a parameter mainmenu_retval, which when 0, signals all previous mainmenu() to exit
         int mainmenu(bool = true);
@@ -235,6 +213,14 @@ class timetable{
 		~timetable();
 };
 
+void timetable::sample_fill(){
+	for (int i = 0; i < ndays; i++)
+	{
+		day[i].make_sample_tlist();
+	}
+	
+}
+
 //RECORDS.CPP classes START
 class irecbox
 {
@@ -242,14 +228,12 @@ class irecbox
 //	int order;	//FUTURE... Curently using just the indices of the 'irecbox **todayarray'
 	string coursecode;
 //Added on 28th December 2019
-//	timeboxn *course;	//Pointer to the course box
+//	timebox *course;	//Pointer to the course box
 public:
 	int npresent, nabsent, nbunk;/*, n_not_entered;	//Practically not that important*/
-	irecbox* next,*prev;
 	string get_coursecode() const;
 	void change_coursecode(string);
 	irecbox(){
-//		order = 0;
 		coursecode = "";
 		npresent = nabsent = nbunk =0;
 	}
@@ -266,47 +250,33 @@ void irecbox::change_coursecode(string s){
 }
 
 
-class a_register
-{
+class a_register{
 	bool setup_complete;
+					//FUTURE_NOTE - When we load the 'records_list' using the RECOVERconfig(), have a temporary copy, then change only those irecboxes that have the courcesoce present, in the records_list set by set_total_today_array()
+	vector<irecbox> records_list;	//total list
+		//Put this array of pointers in this class, since it needs to access the a_register class list, but it can't from within a_register
+//    irecbox **todaylist;	//Make 'array of pointers' using a_register::(*table).total_courses
+	vector<irecbox*> todaylist;	//its elements aren't 'irecbox' but only pointers, since it can just point to records_list elements
 public:
 	timetable table;	//links with table selected during initial setup
 	//Read from the config file, and the table file (that too read from config file), and then load the table with that file name, then link with this
-	int today_num_courses;
-	void update_num_courses();	//Both today and total
 //	void get_initstatus();	//sets setup_complete
 	void RECOVERconfig();	//IT MAY BE MADE A GLOBAL FUNCTION
 						//recovers from Attendance_Register.conf file...
 						//	It will store : setup_complete, table_name, timetable::total_courses (not of today; that will be set by function),
-						//					listbox data (of irecboxes)
+						//					a_register data (of irecboxes)
 
 //	void settings();	//FUTURE
-	a_register();
-/*	~a_register();
-*/};
-
-void a_register::RECOVERconfig(){
-	//TRIAL
-	setup_complete = true;
-}
-
-class listbox : public a_register 	//Made public, only to access table with dot_operator, from main() 'through' listbox object
-{
-	irecbox* front,*rear;	//A LIST
-		//Put this array of pointers in this class, since it needs to access the listbox class list, but it can't from within a_register
-    irecbox **todaylist;	//Make 'array of pointers' using a_register::(*table).total_courses
-	int numbox;	//lenght of list
-public:
-	void totaldisplay();
-	void idisplay(string*);	//Displays records for a particular records only
+	void totaldisplay(void);
+	void idisplay(string);	//Displays records for a particular records only
 	//FUTURE - Display when the particular coursecode takes place also... preferably, link it with it's lab course also
-	void parseinput(string);	//Updates the records with the given input
+	void parseInput(string);	//Updates the records with the given input
 								//trear as yynny, or YNN, or YnnNy, or Y10nn1... ie. check each digit individualy == 'y' || 'Y' || '1'
-	void initiate();	//parent calls it, after initiating timetable
-	void set_today_array();	//this can't be used to set today_courses, since it needs it beforehand
-	irecbox* find_irecbox(string*);
-	listbox();
-	~listbox();
+	void set_total_today_array(void);
+	irecbox* find_irecbox(string);	//finds in records_list()
+	bool already_present_in_todaylist(string);
+	a_register();
+	~a_register();
 };
 
 int main(int argc, char const *argv[]){
@@ -324,7 +294,7 @@ int main(int argc, char const *argv[]){
 	set_h_w();
 	
 //	a_register register_object;
-	listbox all_records;
+	a_register all_records;
 	all_records.table.mainmenu();
 	//register_object.check_initstatus();	//Checks whether initial setup complete or not
 
@@ -354,7 +324,7 @@ int main(int argc, char const *argv[]){
 	}
 	else {
 		try{
-			//all_records.parseinput(&icommand);
+			all_records.parseInput(icommand);
 		}
 		catch(char *s){
 			std::cout<<s;
@@ -586,7 +556,13 @@ void vibrate(string msg){	//Doesn't actually vibrate, as visulaization expected
 			for(int j=0;j<space;j++) std::cout<<' ';	//the vibrations start here
 			std::cout<<msg;
 			std::cout<<std::endl;
-			usleep(30000); //0.07 sec
+			
+			#ifdef __linux__
+				usleep(30000);
+			#else
+				Sleep(30000);
+			#endif
+
 			if(dir){
 				space++;
 				if((space - terminal_width/2) == 1*msg.size()/4 - amp_diff)
@@ -613,7 +589,6 @@ timetable::timetable(){
 			state=false;
 			ndays=5;
 			total_courses=0;
-			day = new daylist[ndays];	//FUTURE - This helps to have option for more days
 			string dayname;
 			for(int i=0;i<ndays;i++){
 				switch(i){
@@ -635,7 +610,6 @@ timetable::timetable(){
 timetable::~timetable(){
 	for(int i=0; i<ndays; i++)
 		day[i].~daylist();
-	delete[] day;
 }
 
 int timetable::mainmenu(bool mainmenu_retval){
@@ -778,9 +752,9 @@ void timetable::set_total_courses(){
 	for(int i=0;i<ndays;i++){
 		for(int j=0;j<8;j++){
 			if(day[i].tpoints[j] == NULL) continue;
-			const string* sptr = day[i].tpoints[j]->get_coursecode();
-			if(!distinct_courses.is_in_list( *sptr )){
-				distinct_courses.add_in_list(*sptr);
+			const string sptr = day[i].tpoints[j]->get_coursecode();
+			if(find( distinct_courses.begin(), distinct_courses.end(), sptr ) == distinct_courses.end()){	//will be true if not found
+				distinct_courses.push_back(sptr);
 				++total_courses;
 			}
 		}
@@ -853,10 +827,10 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 		for( j=0 ; j<4 ; ++j ){
 			if( ret_day(i)->tpoints[j] != NULL ){
 //				len = d[i].tpoints[j]->get_coursecode()->size();	//Display CourseCode
-				len = ret_day(i)->tpoints[j]->get_coursecode()->size();
+				len = ret_day(i)->tpoints[j]->get_coursecode().size();
 				for( k=0 ; k < 5 -len/2 ; ++k ) std::cout<<' ';
 //				std::cout<<*(d[i].tpoints[j]->get_coursecode());
-				std::cout<<*(ret_day(i)->tpoints[j]->get_coursecode());
+				std::cout<<ret_day(i)->tpoints[j]->get_coursecode();
 				for( k=0 ; k < 5 -len + len/2 ; ++k ) std::cout<<' ';
 			}
 			else{
@@ -875,11 +849,11 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 		std::cout<<"    |";
 		for( j=4 ; j<8 ; ++j ){
 			if( ret_day(i)->tpoints[j] != NULL ){
-//				len = d[i].tpoints[j]->get_coursecode()->size();	//Display CourseCode
-				len = ret_day(i)->tpoints[j]->get_coursecode()->size();
+//				len = d[i].tpoints[j]->get_coursecode().size();	//Display CourseCode
+				len = ret_day(i)->tpoints[j]->get_coursecode().size();
 				for( k=0 ; k < 5 -len/2 ; ++k ) std::cout<<' ';
-//				std::cout<<*(d[i].tpoints[j]->get_coursecode());
-				std::cout<<*(ret_day(i)->tpoints[j]->get_coursecode());
+//				std::cout<<d[i].tpoints[j]->get_coursecode();
+				std::cout<<ret_day(i)->tpoints[j]->get_coursecode();
 				for( k=0 ; k < 5 -len + len/2 ; ++k ) std::cout<<' ';
 			}
 			else{
@@ -1030,10 +1004,10 @@ void timetable::savetxt(){
 		for( j=0 ; j<4 ; ++j ){
 			if( ret_day(i)->tpoints[j] != NULL ){
 //				len = d[i].tpoints[j]->get_coursecode()->size();	//Display CourseCode
-				len = ret_day(i)->tpoints[j]->get_coursecode()->size();
+				len = ret_day(i)->tpoints[j]->get_coursecode().size();
 				for( k=0 ; k < 5 -len/2 ; ++k ) fout<<' ';
 //				fout<<*(d[i].tpoints[j]->get_coursecode());
-				fout<<*(ret_day(i)->tpoints[j]->get_coursecode());
+				fout<<ret_day(i)->tpoints[j]->get_coursecode();
 				for( k=0 ; k < 5 -len + len/2 ; ++k ) fout<<' ';
 			}
 			else{
@@ -1052,11 +1026,11 @@ void timetable::savetxt(){
 		fout<<"    |";
 		for( j=4 ; j<8 ; ++j ){
 			if( ret_day(i)->tpoints[j] != NULL ){
-//				len = d[i].tpoints[j]->get_coursecode()->size();	//Display CourseCode
-				len = ret_day(i)->tpoints[j]->get_coursecode()->size();
+//				len = d[i].tpoints[j]->get_coursecode().size();	//Display CourseCode
+				len = ret_day(i)->tpoints[j]->get_coursecode().size();
 				for( k=0 ; k < 5 -len/2 ; ++k ) fout<<' ';
-//				fout<<*(d[i].tpoints[j]->get_coursecode());
-				fout<<*(ret_day(i)->tpoints[j]->get_coursecode());
+//				fout<<d[i].tpoints[j]->get_coursecode();
+				fout<<ret_day(i)->tpoints[j]->get_coursecode();
 				for( k=0 ; k < 5 -len + len/2 ; ++k ) fout<<' ';
 			}
 			else{
@@ -1078,13 +1052,18 @@ void timetable::savetxt(){
 	fout.close();
 }
 
-string** timetable::contoarray(){	//Returning 2D array... MAY FAIL
-	string** retarr;
-	retarr=(string**)(new string[ndays][8]);	//IMPORTANT - DON'T FORGET TO DELETE
+vector<vector<string>> timetable::contoarray(){	//Returning 2D array... MAY FAIL
+	vector<vector<string>> retarr;	//UPDATE_NOTE - This is basically a ndays*8 2D matrix, which may not always be the case
+	retarr.reserve(ndays);	//IMPORTANT - DON'T FORGET TO DELETE
+	for (int i = 0; i < ndays; i++)
+	{
+		retarr[i].reserve(8);
+	}
+	
 	for(int i=0;i<ndays;i++)
 		for(int j=0;j<8;j++){
             if(day[i].tpoints[j])
-			    retarr[i][j]=*(day[i].tpoints[j]->get_coursecode());
+			    retarr[i][j]=day[i].tpoints[j]->get_coursecode();
             else retarr[i][j]="NULL"; }
 	return retarr;
 }
@@ -1107,215 +1086,236 @@ daylist* timetable::ret_day(int dayn){
 }
 
 daylist::daylist(){
-			front=rear=NULL;
-			numbox=0;
+			class_start = 8.5;
+			class_end = 17.5;
+			recess_start = 12.5;
+			recess_end = 13.5;
+			class_length = 1;
 }
 
 daylist::~daylist(){
 				//IMP - In these destructors, remember to use 'delete' data allocated using 'new'
-	timeboxn *tmp = front;
-    while(numbox && !(front)){
-        tmp=front;
-        front=tmp->next;
-        delete tmp;
 }
+
+timebox::timebox(){
+
+//	next=NULL;
+//	prev=NULL;
+//	recbox = NULL;
+	box_type = true;
+	coursecode = "NULL";
+}
+
+/*const */string timebox::get_coursecode(){
+	return coursecode;
+}
+
+void timebox::change_coursecode(string sptr){
+	coursecode = sptr;
+}
+
+void timebox::change_coursecode(char* sptr){
+	coursecode = *sptr;
+}
+
+void timebox::set_sub(){
+	int i=0;
+	while(i<coursecode.size()){
+		if((coursecode[i] >= 65 && coursecode[i] <= 90)||(coursecode[i] >= 97 && coursecode[i] <= 122))
+			break;
+		else sub.push_back(coursecode[i]);
+		++i;
+	}
+}
+
+void daylist::set_tpoints(){	//NOTE - only used by display function, else no hinderance to supporting CUSTOM Boxes, BUT it does change class_end and recess_start
+//	int org_recess_start = recess_start, org_class_end = class_end ;
+	if(ceil((recess_start - class_start)/class_length) != int((recess_start - class_start)/class_length)){
+		recess_start -= fmod(recess_start - class_start,class_length);
+	}
+	if(ceil((class_end - recess_end)/class_length) != int((class_end - recess_end)/class_length)){
+		class_end -= fmod(class_end - recess_end,class_length);
+	}
+	int class_boxes = int((recess_start - class_start)/class_length) + int((class_end - recess_end)/class_length);
+
+	tpoints.reserve(class_boxes);
+	
+	int i=0, j=0, k=0;
+	for (i = 0; i < class_boxes; i++)
+	{
+		tpoints.emplace_back(NULL);
+	}
+	for (i = 0; i < timelist.size(); i++)
+	{
+		j=0;
+		if(timelist[i].starttime < recess_start ){	//due to the way they are assigned, endtime will also be <= recess_start
+			j=(timelist[i].endtime - timelist[i].starttime)/class_length;
+			for(k=0; k<j; ++k)
+				tpoints[int((timelist[i].starttime - class_start)/class_length) + k] = &timelist[i];
+		}
+		else{
+			//after recess
+			j = (timelist[i].endtime - timelist[i].starttime)/class_length;
+			for(k=0; k<j; ++k){
+				tpoints[int((timelist[i].starttime - recess_end + recess_start - class_start)/class_length) + k] = &timelist[i];
+			}
+		}
+	}
 }
 
 void daylist::make_tlist(){
-	bool tbox_extend_flag = true;	//tells if, to just extend endtime of previous box by 1, or to create a new box altogether... in case 'y' is entered
-	int i=8;
+	int i=class_start;
+	bool tbox_extend_flag;
 	string s;
-	for(i=8;i<17;i++){
-		if( i < 11){
-			std::cout<<'\t'<<i<<":30am-"<<i+1<<":30am ";
-			if( i ==8 ) std::cout<<"  ";
-			else if ( i==9 ) std::cout<<' ';
+    short mins_start, mins_end;
+    bool am_pm_start, am_pm_end;
+	for(i=class_start;i<class_end;i+=class_length){
+		if( i+class_length < recess_start){
+			mins_start = (i/10)*6/10;	mins_end = ((i+class_length)/10)*6/10;
+			am_pm_start = i<12 ? true:false;	am_pm_end = (i+class_length<12) ? true:false;
+			std::cout<<'\t'<<int(i)<<":"<<mins_start;
+			am_pm_start ? std::cout<<"am" : std::cout<<"pm" ;
+			std::cout<<'-'<<int(i+class_length)<<":"<<mins_end;
+			am_pm_end ? std::cout<<"am" : std::cout<<"pm" ;
+			std::cout<<' ';
+			if( int(i + class_length) < 10 ) std::cout<<"  ";
+			else if ( int(i + class_length) >= 10 ) std::cout<<' ';
 			std::cout<<"- ";
 		}
-		else 	if( i == 11 )
-					std::cout<<"\t11:30am-"<<"12:30pm - ";
-				else if ( i ==12 ) continue;
-					 else
-						std::cout<<'\t'<<i-12<<":30pm-"<<i-11<<":30pm - ";
+		else{
+			timebox recess_box;
+			recess_box.box_type = false;
+			timelist.push_back(recess_box);
+
+			i = recess_end;
+			continue;
+		}
 
 		getline ( std::cin, s );
 		if( s == "" ){	//in case there's an empty box (a gap), we can't simply increase endtime, by a simple 1, nor 2 nor others
-			tbox_extend_flag = false;	//tells not to extend endtime, of previous box, instead create a new box altogether
 			continue;
 		}
 		else{	if ( s == "y" || s=="Y" ){
-					if(tbox_extend_flag){	//if it's true, extend endtime
-						float *endt = &(traverseto(numbox-1)->endtime);
-						if( *endt < 11 || *endt > 12 )
-							*endt +=1;
-						else *endt +=2;
+					if(timelist.size() == 0)	continue;
+					if(timelist.back().endtime + class_length > recess_start && timelist.back().starttime < recess_start){
+							i = recess_end;	//this will create a void in between sometimes, and is deliberate, for eg. class till 11:00 then recess from 12:00 and 13:00, then 11 to 12 is void, since class_length is 2
+							timebox new_box;
+							new_box.change_coursecode(timelist.back().get_coursecode());
+							new_box.starttime = i;
+							new_box.endtime = i + class_length;
+							new_box.set_sub();				
+							timelist.push_back(new_box);
 					}
 					else{
-						append_box( traverseto(numbox-1)->get_coursecode() , i );
-						tbox_extend_flag = true;	//resetting this flag, since there's no gap
+							timelist.back().endtime += class_length;
 					}
 				}
-				else
-					append_box( &s , i );
+				else{
+					timebox new_box;
+					new_box.change_coursecode(s);
+					new_box.starttime = i;
+					new_box.endtime = i + class_length;
+					new_box.set_sub();				
+					timelist.push_back(new_box);
+				}
 		}
 	}
 	set_tpoints();
 }
 
-timeboxn::timeboxn(){
+void daylist::make_sample_tlist(){
+	int i=class_start;
+	bool tbox_extend_flag;
+	string s;
+    short mins_start, mins_end;
+    bool am_pm_start, am_pm_end;
+	for(i=class_start;i<class_end;i+=class_length){
+		if( (i+class_length >= recess_start) && (i+class_length <= recess_end) ){
+			timebox recess_box;
+			recess_box.box_type = false;
+			timelist.push_back(recess_box);
 
-	next=NULL;
-	prev=NULL;
-//	recbox = NULL;
-	coursecode = "NULL";
-}
-
-string* timeboxn::get_coursecode(){
-	return &coursecode;
-}
-
-void timeboxn::change_coursecode(string* sptr){
-	coursecode = *sptr;
-}
-
-void timeboxn::change_coursecode(char* sptr){
-	coursecode = *sptr;
-}
-
-void daylist::append_box(string* s, int stime){
-	timeboxn *node = new timeboxn;
-	node->change_coursecode(s);
-	//Loop to set 'sub'
-	string tmpstr = *s;
-	int i=0,j=0,k=0;
-	for ( i=0 ; i<tmpstr.size() ; i++ ){
-		k=i;
-		while(tmpstr[k] >= 48 && tmpstr[k] <= 57 && k!=tmpstr.size())
-			k++;
-		for(j=0; j< tmpstr.size() - k +1 ;j++){
-			tmpstr[j+i] = tmpstr[j+k];
+			i = recess_end;
+			continue;
 		}
-		tmpstr.resize(j+i-1);
-	}
-	node->sub = tmpstr;
-	//Loop end
 
-	node->starttime = stime + 0.5;
-	node->endtime = stime + 1.5;
-	if( front ){
-		node->prev = rear;
-		rear->next = node;
-		node->next = NULL;
-		rear = node;
-	}
-	else{
-		node->next = NULL;
-		node->prev = NULL;
-		front = node;
-		rear = node;
-	}
-	++numbox;
-}
-
-void daylist::set_tpoints(){
-	int i=0;
-	float st=8.5, et=8.5;
-	timeboxn* tptr;		
-	for(i=0;i<numbox;++i){
-		tptr = traverseto(i);
-		st = tptr->starttime;
-		et = tptr->endtime;
-		if( st < 13 )		//FUTURE - May make these loops, a bit faster
-			tpoints[int(st-8.5)] = tptr;
-		else
-			tpoints[int(st-9.5)] = tptr;
-		for(int j=st+1; j<et; j++){
-			if( j < 13 )
-				tpoints[int(j-8.5)] = tptr;
-			else
-				tpoints[int(j-9.5)] = tptr;
+		int i;
+		string s;
+		refresh_time();
+		i = (time_now.tm_sec)%26;
+		s.push_back(65 + i);
+		for(int j=0; j<4; ++j){
+			refresh_time();
+			i = (time_now.tm_sec)%26;
+			s.push_back(97 + i);
 		}
+		timebox new_box;
+		new_box.change_coursecode(s);
+		new_box.starttime = i;
+		new_box.endtime = i + class_length;
+		new_box.set_sub();				
+		timelist.push_back(new_box);
 	}
-
-}
-
-timeboxn* daylist::traverseto(int loc){
-	if(loc < 0) return NULL;
-	else if(loc >= numbox){
-		std::cout<<"\nEnough Entries Not Available";
-		return NULL;
-	}
-
-	static timeboxn* retptr;	//made static, so that no other memory can alter the location stored in pointer
-	retptr=front;	//don't merge with above, since it's static
-	for(int i=0;i<loc;i++)
-		retptr=retptr->next;
-	return retptr;
-
+	set_tpoints();
 }
 
 void daylist::save_to_binary(std::ofstream* fsave){
 	size_t len = day.size() + 1;
 	fsave->write((char*)&len,sizeof(len));
 	fsave->write(day.c_str(),(len*sizeof(char)));	
-	fsave->write((char*)&numbox,sizeof(numbox));
-	timeboxn *temp;
-	temp = front;
-	for(int i=0;i<numbox;i++){	//while(temp != NULL)
-		len = temp->get_coursecode()->size() + 1;
+	fsave->write((char*)&class_start, sizeof(class_start));
+	fsave->write((char*)&class_end, sizeof(class_end));
+	fsave->write((char*)&class_length, sizeof(class_length));
+	fsave->write((char*)&recess_start, sizeof(recess_start));
+	fsave->write((char*)&recess_end, sizeof(recess_end));
+	for(int i=0;i<timelist.size();i++){	//while(temp != NULL)
+		bool box_type;
+		len = timelist[i].get_coursecode().size() + 1;
 		fsave->write((char*)&len,sizeof(len));	//Actually sizeof() returns auto, which is 8bytes, but still...
-		fsave->write(temp->get_coursecode()->c_str(),len*sizeof(char));
-		len = sizeof(temp->sub);
-		fsave->write((char*)&len,sizeof(len));
-		fsave->write(temp->sub.c_str(),len*sizeof(char));
-		fsave->write((char*)&temp->starttime,sizeof(temp->starttime));
-		fsave->write((char*)&temp->endtime,sizeof(temp->endtime));
-		temp = temp->next;
+		fsave->write(timelist[i].get_coursecode().c_str(),len*sizeof(char));
+			//No need to save sub, that will be autoset by set_sub()
+		fsave->write((char*)&timelist[i].box_type,sizeof(box_type));
+		fsave->write((char*)&timelist[i].starttime,sizeof(timelist[i].starttime));
+		fsave->write((char*)&timelist[i].endtime,sizeof(timelist[i].endtime));
 	}
 }
 
 void daylist::load_from_binary(std::ifstream* f_recall){
-	size_t len;
+	reset_records();
+
+	size_t len = 0;
 	char *cstr;
-	string str;
-	f_recall->read((char*)&len, sizeof(len));
+	f_recall->read((char*)&len,sizeof(len));
 	cstr = new char[len];
 	f_recall->read(cstr,len*sizeof(char));	
 	day = cstr;
 	delete[] cstr;
-	f_recall->read((char*)&numbox,sizeof(numbox));
-	front = NULL;
-	timeboxn *tmp = front;
-	timeboxn *box;	//will be alloted by 'new'
-	for(int i=0;i<numbox;i++){	//while(temp != NULL)
-		box = new timeboxn;
-		
-		if(i == 0){	//For setting *front
-			front = box;
-			
-		}
-		else{
-			box->prev = tmp;
-			box->prev->next = box;
-		}
-
-		f_recall->read((char*)&len,sizeof(len));
-		cstr = new char[len];
-		f_recall->read(cstr,len*sizeof(char));
-		box->change_coursecode(cstr);
-		delete[] cstr;
-
+	f_recall->read((char*)&class_start, sizeof(class_start));
+	f_recall->read((char*)&class_end, sizeof(class_end));
+	f_recall->read((char*)&class_length, sizeof(class_length));
+	f_recall->read((char*)&recess_start, sizeof(recess_start));
+	f_recall->read((char*)&recess_end, sizeof(recess_end));
+	for(int i=0;i<timelist.size();i++){	//while(temp != NULL)
+		timebox new_box;
+		float st_end_time;
+		bool box_type;
+		len = 0;
 		f_recall->read((char*)&len,sizeof(len));	//Actually sizeof() returns auto, which is 8bytes, but still...
 		cstr = new char[len];
 		f_recall->read(cstr,len*sizeof(char));
-		box->sub = cstr;
-		delete[] cstr;
-		f_recall->read((char*)&box->starttime,sizeof(box->starttime));
-		f_recall->read((char*)&box->endtime,sizeof(box->endtime));
-		box->next = NULL;
-		rear = box;
-		tmp = box;
+		new_box.change_coursecode(cstr);
+		f_recall->read((char*)&st_end_time,sizeof(st_end_time));
+		new_box.starttime = st_end_time;
+		f_recall->read((char*)&st_end_time,sizeof(st_end_time));
+		new_box.endtime = st_end_time;
+		f_recall->read((char*)&box_type, sizeof(box_type));
+		new_box.box_type = box_type;
+		
+		new_box.set_sub();
+
+		timelist.push_back(new_box);
 	}
+
 	set_tpoints();
 }
 
@@ -1323,144 +1323,131 @@ void daylist::set_Day(string daystr){
 	day = daystr;
 }
 
-a_register::a_register(){
-//	get_initstatus();
-	today_num_courses = 0;
-}
-
-void listbox::parseinput(string s){
-//	update_num_courses();	//already called, by set_today_array(), which itself called by the constructor
-	for(int i=0;i<today_num_courses;++i){
-		if(s[i] == 'y' || s[i] == 'Y' || s[i] == '1' )
+void a_register::parseInput(string parseString){
+	if(parseString.size() > todaylist.size()){
+		parseString.erase(todaylist.size(), parseString.size() -1);
+	}
+	for(int i=0; i<parseString.size(); ++i){
+		if(parseString[i] == 'y' || parseString[i] == 'Y' || parseString[i] == '1' )
 			++(todaylist[i]->npresent);
-		else if(s[i] == 'n' || s[i] == 'N' || s[i] == '0' )
+		else if(parseString[i] == 'n' || parseString[i] == 'N' || parseString[i] == '0' )
 			++(todaylist[i]->nabsent);
-		else if(s[i] == 'b' || s[i] == 'B' || s[i] == '2' ) 
+		else if(parseString[i] == 'b' || parseString[i] == 'B' || parseString[i] == '2' ) 
 			++(todaylist[i]->nbunk);
 		else {
-			std::cout<<"\nWe couldn't interpret "<<s[i]<<"\nReverting all updates of today... Try Again :)";
+			std::cerr<<"\nWe couldn't interpret "<<parseString[i]<<"\nReverting all updates of today... Try Again :)";
 			for(int j=i-1;j>=0;--j){
-				if(s[j] == 'y' || s[j] == 'Y' || s[j] == '1' )
+				if(parseString[j] == 'y' || parseString[j] == 'Y' || parseString[j] == '1' )
 					--(todaylist[j]->npresent);
-				else if(s[j] == 'n' || s[j] == 'N' || s[j] == '0' )
+				else if(parseString[j] == 'n' || parseString[j] == 'N' || parseString[j] == '0' )
 					--(todaylist[j]->nabsent);
 				else --(todaylist[j]->nbunk);	//It can only be one among these 3
 			}
 		}
 	}
+
 }
 
-void a_register::update_num_courses(){
-	daylist *today;
-	if((time_now.tm_wday + 6)%7 <= table.ndays)
-		today = table.ret_day((time_now.tm_wday + 6)%7);
-	else {
-		today_num_courses=0;
-		return;
-	}
-	string_list tmplist;
-	for(int j=0;j<8;j++){
-		const string* sptr = today->tpoints[j]->get_coursecode();
-		if(!tmplist.is_in_list( *sptr )){
-			tmplist.add_in_list(*sptr);
-			++today_num_courses;
-		}
-	}
-	table.set_total_courses();
-}
-
-void listbox::totaldisplay(){
-	irecbox *tmp = front;
-	for(int i=0, j=0; i<numbox; i++){
-		cout<<tmp->get_coursecode()<<'\n';
-		for(j=0;j<tmp->get_coursecode().size(); ++j)
-			cout<<'-';
-		cout<<"\nPresent = "<<tmp->npresent
-			<<"\nAbsent = "<<tmp->nabsent
-			<<"\nBunks = "<<tmp->nbunk;
-		cout<<"\n\n";		
+void a_register::totaldisplay(){
+	for(int i=0; i<records_list.size(); ++i){
+		idisplay(records_list[i].get_coursecode());
 	}
 }
 
-irecbox* listbox::find_irecbox(string *search_code){
-	irecbox *tmp_ptr = front;
+void a_register::idisplay(string display_cc){	//CourseCode
 
-	for(int i=0; i<numbox; ++i){
-		if(*search_code == tmp_ptr->get_coursecode())
-			return tmp_ptr;
-//WARNING - Returning local pointer...
-	//Q. BUT IS IT PROBLEMATIC, SINCE I HAVE PASSED THE ADDRESS VALUE OF A NODE, WHICH STILL EXISTS ??
-		tmp_ptr = tmp_ptr->next;
+	int i=0;
+	irecbox *display_rec_box = find_irecbox(display_cc);
+
+	if(display_rec_box == NULL)	return;
+
+	set_h_w();
+	if(terminal_width > 12){
+		i=12;
+		while(i--)	std::cout<<'-';
+		i=12;
+		std::cout<<std::endl;
+		while(i--)	std::cout<<'-';
+	}
+	else{
+		i=terminal_width;
+		while(i--)	std::cout<<'-';
+		i=terminal_width;
+		std::cout<<std::endl;
+		while(i--)	std::cout<<'-';
+	}
+	std::cout<<std::endl;
+	std::cout<<display_cc;
+	std::cout<<std::endl;
+
+	if(terminal_width > 12){
+		i=12;
+		while(i--)	std::cout<<'_';
+	}
+	else{
+		i=terminal_width;
+		while(i--)	std::cout<<'_';
+	}
+	std::cout<<std::endl;
+	std::cout<<"Present -> "<<display_rec_box->npresent<<std::endl;
+	std::cout<<"Absent -> "<<display_rec_box->nabsent<<std::endl;
+	std::cout<<"Bunk -> "<<display_rec_box->nbunk<<std::endl<<std::endl;
+}
+
+bool a_register::already_present_in_todaylist(string query_str){
+	for(int i=0; i<todaylist.size(); ++i){
+		if(todaylist[i]->get_coursecode() == query_str)
+			return true;
+	}
+	return false;
+}
+
+irecbox* a_register::find_irecbox(string search_str){
+	for(int i; i<records_list.size(); ++i){
+		if(records_list[i].get_coursecode() == search_str)
+			return &records_list[i];
 	}
 	return NULL;
 }
 
-void listbox::set_today_array(){
-	int tmp_num = 0;
-	irecbox *tmpbox;
-	todaylist = new irecbox*[a_register::today_num_courses];
-	refresh_time();
-	if(time_now.tm_wday < a_register::table.ndays){
-		//tm_wday is 0 for Sunday... so, for Friday, it's 5...
-		// ret_day(int) takes input from 0(Monday) to Sunday(6)so only problem is to make Sunday as 6
-		string_list tmp_daylist;
-		//The below 'const' caused the error: passing 'const timeboxn' as 'this' argument discards qualifiers [-fperissive]
-		/*const */timeboxn *temp = a_register::table.ret_day((time_now.tm_wday + 6)%7)->traverseto(0);
-		//WARNING - The above can lead to HACKING of the system... since, even though *front is private, by using public function traverseto(0) returns the *front pointer!!	And same goes, for functions that are returning modifiable pointers to the private data members
-		while(temp!=NULL){
-			if(tmp_daylist.is_in_list(*(temp->get_coursecode())))
-				continue;
-			else{
-				tmp_daylist.add_in_list(*(temp->get_coursecode()));
-				todaylist[tmp_num] = find_irecbox(temp->get_coursecode());
-					//The above line may cause SEGMENTATION FAULT
-				++tmp_num;
+void a_register::set_total_today_array(){
+
+	daylist *the_day;
+	int i=0, j=0;
+	for(i=0; i<table.ndays; ++i){
+		the_day = table.ret_day(i);
+		for(j=0; j<the_day->tpoints.size(); ++j){
+			if(the_day->tpoints[j] != NULL){
+				if( find(records_list.begin(), records_list.end(), the_day->tpoints[j]->get_coursecode()) == records_list.end() ){	//ie. not found
+					irecbox new_rec_box;
+					new_rec_box.change_coursecode(the_day->tpoints[j]->get_coursecode());
+					records_list.push_back(new_rec_box);
+				}
 			}
 		}
-//		if(tmp_num - 1 != a_register::today_num_courses ) //THEN IT's !!!!BAD!!!!
-//		if(todaylist[i] == NULL)... it's a critical problem, and may cause Segmentation Fault
-		//CONSIDERING OK FOR NOW!
+	}
+	the_day = table.ret_day((time_now.tm_wday + 1)%6);	//It is days since Sunday (ie. 0-6), and i converted to days since Monday
+	if(the_day == NULL){
+		return;
 	}
 	else{
-		cerr<<"Today's TimeTable can't be loaded, or it hasn't been entered for ";
-		switch(time_now.tm_wday){
-			case 0: cerr<<"Sunday"; break;
-			case 1: cerr<<"Monday"; break;
-			case 2: cerr<<"Tuesday"; break;
-			case 3: cerr<<"Wednesday"; break;
-			case 4: cerr<<"Thursday"; break;
-			case 5: cerr<<"Friday"; break;
-			case 6: cerr<<"Saturday"; break;
+		for(j=0; j<the_day->tpoints.size(); ++j){
+			if(the_day->tpoints[j] != NULL){
+				if( !already_present_in_todaylist( the_day->tpoints[j]->get_coursecode() )){
+					irecbox *rec_box_ptr = NULL;
+					rec_box_ptr = find_irecbox( the_day->tpoints[j]->get_coursecode());
+					todaylist.push_back(rec_box_ptr);
+				}
+			}
 		}
-		cerr<<'\n';
 	}
+
 }
 
-listbox::listbox(){
-	a_register::update_num_courses();
-	front = rear = NULL;
-	numbox = 0;
-	initiate();
+a_register::~a_register(){
 }
 
-void listbox::initiate(){
-	int length = a_register::table.total_courses;
-	strnode *iter = a_register::table.distinct_courses.front;	//iterates through whole list
-	irecbox *rbox;
-	for(int i=0; i< length; ++i){
-		rbox = new irecbox;
-		rbox->change_coursecode(iter->s);
-		iter = iter->next;
-	}
-	numbox = length;
-}
-
-listbox::~listbox(){
-	irecbox *tmp= front;
-	delete[] todaylist;
-	for(int i=0; i<numbox; ++i){	//or, while(front != NULL)
-		tmp = front;
-		front = front->next;
-		delete tmp;
-	}
+void a_register::RECOVERconfig(){
+	//TRIAL
+	setup_complete = true;
 }
