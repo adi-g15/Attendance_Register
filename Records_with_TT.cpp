@@ -126,7 +126,7 @@ class timebox{
 		
     	timebox();
 //        void fillbox();	//have this fillbox in its parent, and there dont ask user to enter time also, just keep taking input for different intervals, let user leave it blank, if empty period
-        /*const */string get_coursecode(void);
+        /*const */string get_coursecode(void) const;
         void change_coursecode(string);
 //Added on 25 December 2019
         void change_coursecode(char*);	//Used ONLY in daylist::load_from_binary()...
@@ -140,7 +140,7 @@ class daylist{
 			*/
 	string day;	//let the parent fill this, and in capitals
 	std::vector<timebox> timelist;
-	static float class_start, class_end, class_length, recess_start, recess_end;	//class_length seems more connected to timetable class
+	/*static*/ float class_start, class_end, class_length, recess_start, recess_end;	//class_length seems more connected to timetable class
 	public:
 	    vector</*const */timebox*> tpoints;	//IMP_NOTE - THE CONST IS HIGHLY PROBLEMATIC HERE!
 //DECIDED_COMMENT - //WARNING - If wanting to dynamically allocate tpoints, change timetable::set_total_courses().. No need to dynamically allocate though
@@ -275,6 +275,7 @@ public:
 	void set_total_today_array(void);
 	irecbox* find_irecbox(string);	//finds in records_list()
 	bool already_present_in_todaylist(string);
+	bool already_present_in_recordslist(string);
 	a_register();
 	~a_register();
 };
@@ -1106,7 +1107,7 @@ timebox::timebox(){
 	coursecode = "NULL";
 }
 
-/*const */string timebox::get_coursecode(){
+/*const */string timebox::get_coursecode() const{
 	return coursecode;
 }
 
@@ -1137,13 +1138,12 @@ void daylist::set_tpoints(){	//NOTE - only used by display function, else no hin
 		class_end -= fmod(class_end - recess_end,class_length);
 	}
 	int class_boxes = int((recess_start - class_start)/class_length) + int((class_end - recess_end)/class_length);
-
-	tpoints.reserve(class_boxes);
 	
 	int i=0, j=0, k=0;
+	timebox *box_ptr = NULL;
 	for (i = 0; i < class_boxes; i++)
 	{
-		tpoints.emplace_back(NULL);
+		tpoints.push_back(box_ptr);
 	}
 	for (i = 0; i < timelist.size(); i++)
 	{
@@ -1402,6 +1402,15 @@ bool a_register::already_present_in_todaylist(string query_str){
 	return false;
 }
 
+bool a_register::already_present_in_recordslist(string query_str){
+	for(int i=0; i<records_list.size(); ++i){
+		if(records_list[i].get_coursecode() == query_str)
+			return true;
+	}
+	return false;
+}
+
+
 irecbox* a_register::find_irecbox(string search_str){
 	for(int i; i<records_list.size(); ++i){
 		if(records_list[i].get_coursecode() == search_str)
@@ -1418,7 +1427,7 @@ void a_register::set_total_today_array(){
 		the_day = table.ret_day(i);
 		for(j=0; j<the_day->tpoints.size(); ++j){
 			if(the_day->tpoints[j] != NULL){
-				if( find(records_list.begin(), records_list.end(), the_day->tpoints[j]->get_coursecode()) == records_list.end() ){	//ie. not found
+				if( !already_present_in_recordslist( the_day->tpoints[j]->get_coursecode() )){	//ie. not found
 					irecbox new_rec_box;
 					new_rec_box.change_coursecode(the_day->tpoints[j]->get_coursecode());
 					records_list.push_back(new_rec_box);
@@ -1441,6 +1450,10 @@ void a_register::set_total_today_array(){
 			}
 		}
 	}
+
+}
+
+a_register::a_register(){
 
 }
 
