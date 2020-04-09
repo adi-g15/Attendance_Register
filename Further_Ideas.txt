@@ -1,0 +1,14 @@
+. Use SMFL graphics to make a simple graphical program also... for them have folders to store the smfl libraries and linking them, and the source (backgrounds) images
+. Design the backround elements for your own, like cmus
+
+. Ask Hi, --NAME-- , and print NAME to be bigger
+
+//Have two copies ... one without using any kind of graphics library, and other with above graphical changes
+
+
+. Convert it to android,windows and as linux package also
+. Program Stores Attendance CourseWise also... for that have classes named courseatten;
+. Have a folder with timetable binary files for all available timetables on the nitp
+
+.TimeTaker as well as LEAST preference - Have a  'save as html' option also 
+It will be good that the alloting of daylist using 'new' considering 5 days be done after ndays has been recovered from recallfile, using load_from_memory()... or can allot in constructor also, but check whether ndays == 5, after loading, if not, then delete[] the previous one, and allote again with new daylist[ndays]

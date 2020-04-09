@@ -46,13 +46,22 @@ FUTURE - "Any Special notes for this day (1 or 0)? ";*/
 */
 #include <string>
 #include <ctime>
-#include <cstdlib>		//For using system("clear") only once
+#include <cstdlib>		//For using system("clear")
 #include <limits>	//for std::numeric_limits
 //#include <ios>	//for <std::streamsize>, both these used in std::cin.ignore()
 #include<vector>
 #include<list>
 #include<cmath>
 #include<algorithm>
+/*
+#if __cplusplus >= 201402	//Actually it should be 201703L, but some earlier versions of G++ using C++17 didnt change __cplusplus, like mine
+							//LEARNT - 201402 vs 201402L -> The 'L' at end signifies long, thats it
+	#include<filesystem>	//after C++17, std::filesystem
+#else
+	#include<boost/filesystem.hpp>	//before C++17, boost::filesystem
+#endif
+*/
+#include<experimental/filesystem>
 
 #ifdef _WIN32	//Macro defined by MSVC (Microsoft Visual C++) compiler (not g++)
 	#include <windows.h>
@@ -69,8 +78,8 @@ FUTURE - "Any Special notes for this day (1 or 0)? ";*/
 using namespace std;
 
 tm time_now;
-string big[26][8]={{"---------","|  ---  |","|  | |  |","|  ---  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"--------\\","|  ---  |","|  | |  |","|  ---  /","|  ---  \\","|  | |  |","|  ---  |","--------/"},{"--------\\","|       |","|  -----/","|  |     ","|  |     ","|  -----\\","|       |","--------/"},{"--------\\","|  ---\\ |","|  |  | |","|  |  | |","|  |  | |","|  |  | |","|  ---/ |","--------/"},{"---------","|       |","|  ------","|  --\\   ","|  --/   ","|  ------","|       |","---------"},{"---------","|       |","|  ------","|  |     ","|  ====  ","|  |     ","|  |     ","----     "},{"--------\\","|       |","|  -----/","|  |     ","|  \\=====","|    |  |","|    |  |","-----/  |"},{"---   ---","| |   | |","| |   | |","| ----- |","| ----- |","| |   | |","| |   | |","---   ---"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","|--- ---|","---------"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","/--- -   ","|----/   "},{"---   ---","| |  / / ","| | / /  ","| /  /   ","| \\  \\   ","| | \\ \\  ","| |  \\ \\ ","---   ---"},{"---      ","| |      ","| |      ","| |      ","| |      ","| |      ","|--- ---|","\\-------|"},{"---   ---","|  \\ /  |","|       |","|  \\ /  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"---   ---","|\\\\   | |","| \\\\  | |","| |\\\\ | |","| | \\\\| |","| |  \\\\ |","| |   \\\\|","---   ---"},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| |   | |","| ----- |","---------"},{"---------","| ----- |","| |   | |","| -----/ ","| |      ","| |      ","| |      ","---      "},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| =======","| ======|","---------"},{"---------","| ----- |","| |   | |","| ----- /","| |\\  \\  ","| | \\  \\ ","| |  \\  \\","---   ---"},{"---------","| |      ","| |      "," \\ --- \\ ","      | |","      | |","|--- ---|","\\-------|"},{"---------","---| |---","   | |   ","   | |   ","   | |   ","   | |   ","   | |   ","   ---   "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","| |   | |","\\ ----- /"," ------- "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","\\ \\   / /"," \\  -  / ","  -----  "},{"--     --","||     ||","||     ||","||     ||","||     ||","\\\\  |  //"," \\\\/ \\// ","  -   -  "},{"--     --"," \\\\   // ","  \\\\ //  ","   \\ /   ","   / \\   ","  // \\\\  "," //   \\\\ ","--     --"},{"---   ---","\\ \\   / /"," \\ \\ / / ","  \\   /  ","   | |   ","   | |   ","   | |   ","   ---   "},{"---------","-------/ ","     //  ","    //   ","   //    ","  //     "," /-------","---------"}};
-string small[26][4]={{"----","|  |","|--|","|  |"},{"----","|__|","|  |","----"},{"----","|   ","|   ","----"},{"---\\","|  |","|  |","---/"},{"----","|__ ","|   ","----"},{"----","|__ ","|   ","|   "},{"----","|   ","| -|","---|"},{"|  |","|__|","|  |","|  |"},{"----"," || "," || ","----"},{" ---","   |","   |","---/"},{"|  /","|/  ","|\\  ","|  \\"},{"|   ","|   ","|   ","----"},{"|  |","|\\/|","|  |","|  |"},{"|  |","|\\ |","| \\|","|  \\"},{"/--\\","|  |","|  |","\\--/"},{"/--\\","|__|","|   ","|   "},{"|--|","|  |","| \\|","|--\\"},{"/--\\","|__|","|\\  ","| \\ "},{"/--\\","|__","   |","\\--/"},{"----"," || "," || "," || "},{"|  |","|  |","|  |","|__|"},{"|  |","|  |","\\  /"," \\/ "},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /  ","/   "},{"/---","  / "," /  ","---/"}};
+string bigChar[26][8]={{"---------","|  ---  |","|  | |  |","|  ---  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"--------\\","|  ---  |","|  | |  |","|  ---  /","|  ---  \\","|  | |  |","|  ---  |","--------/"},{"--------\\","|       |","|  -----/","|  |     ","|  |     ","|  -----\\","|       |","--------/"},{"--------\\","|  ---\\ |","|  |  | |","|  |  | |","|  |  | |","|  |  | |","|  ---/ |","--------/"},{"---------","|       |","|  ------","|  --\\   ","|  --/   ","|  ------","|       |","---------"},{"---------","|       |","|  ------","|  |     ","|  ====  ","|  |     ","|  |     ","----     "},{"--------\\","|       |","|  -----/","|  |     ","|  \\=====","|    |  |","|    |  |","-----/  |"},{"---   ---","| |   | |","| |   | |","| ----- |","| ----- |","| |   | |","| |   | |","---   ---"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","|--- ---|","---------"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","/--- -   ","|----/   "},{"---   ---","| |  / / ","| | / /  ","| /  /   ","| \\  \\   ","| | \\ \\  ","| |  \\ \\ ","---   ---"},{"---      ","| |      ","| |      ","| |      ","| |      ","| |      ","|--- ---|","\\-------|"},{"---   ---","|  \\ /  |","|       |","|  \\ /  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"---   ---","|\\\\   | |","| \\\\  | |","| |\\\\ | |","| | \\\\| |","| |  \\\\ |","| |   \\\\|","---   ---"},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| |   | |","| ----- |","---------"},{"---------","| ----- |","| |   | |","| -----/ ","| |      ","| |      ","| |      ","---      "},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| =======","| ======|","---------"},{"---------","| ----- |","| |   | |","| ----- /","| |\\  \\  ","| | \\  \\ ","| |  \\  \\","---   ---"},{"---------","| |      ","| |      "," \\ --- \\ ","      | |","      | |","|--- ---|","\\-------|"},{"---------","---| |---","   | |   ","   | |   ","   | |   ","   | |   ","   | |   ","   ---   "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","| |   | |","\\ ----- /"," ------- "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","\\ \\   / /"," \\  -  / ","  -----  "},{"--     --","||     ||","||     ||","||     ||","||     ||","\\\\  |  //"," \\\\/ \\// ","  -   -  "},{"--     --"," \\\\   // ","  \\\\ //  ","   \\ /   ","   / \\   ","  // \\\\  "," //   \\\\ ","--     --"},{"---   ---","\\ \\   / /"," \\ \\ / / ","  \\   /  ","   | |   ","   | |   ","   | |   ","   ---   "},{"---------","-------/ ","     //  ","    //   ","   //    ","  //     "," /-------","---------"}};
+string smallChar[26][4]={{"----","|  |","|--|","|  |"},{"----","|__|","|  |","----"},{"----","|   ","|   ","----"},{"---\\","|  |","|  |","---/"},{"----","|__ ","|   ","----"},{"----","|__ ","|   ","|   "},{"----","|   ","| -|","---|"},{"|  |","|__|","|  |","|  |"},{"----"," || "," || ","----"},{" ---","   |","   |","---/"},{"|  /","|/  ","|\\  ","|  \\"},{"|   ","|   ","|   ","----"},{"|  |","|\\/|","|  |","|  |"},{"|  |","|\\ |","| \\|","|  \\"},{"/--\\","|  |","|  |","\\--/"},{"/--\\","|__|","|   ","|   "},{"|--|","|  |","| \\|","|--\\"},{"/--\\","|__|","|\\  ","| \\ "},{"/--\\","|__","   |","\\--/"},{"----"," || "," || "," || "},{"|  |","|  |","|  |","|__|"},{"|  |","|  |","\\  /"," \\/ "},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /  ","/   "},{"/---","  / "," /  ","---/"}};
 string name = "Aditya Gupta";	//Will be taken from the records class
 int terminal_width = 169, terminal_height = 39;		// [DONE] FUTURE - Set this using some function
 
@@ -118,7 +127,7 @@ class timebox{
 	string coursecode;
 //	irecbox *recbox;
 	public:
-		bool box_type;	//0 for recess, 1 for class(default)
+		bool box_type;	//false for recess, true for class(default)
 		string sub;
         float starttime,endtime;  //store 9:30 as 9.5 & 1:30 pm as 13.5... ie. in 24-HOUR FORMAT
 					//Auto assume am for any time (6,12), and for all others 'pm'
@@ -129,7 +138,7 @@ class timebox{
         /*const */string get_coursecode(void) const;
         void change_coursecode(string);
 //Added on 25 December 2019
-        void change_coursecode(char*);	//Used ONLY in daylist::load_from_binary()...
+        void change_coursecode(const char*);	//Used ONLY in daylist::load_from_binary()...
         								//CAN BE REMOVED ONCE daylist::append_box() is utilized
 		void set_sub(void);
 };
@@ -139,7 +148,7 @@ class daylist{
 			/*PROPOSED CHANGES - Utilize append_box() in load_from_binary... first check if it is LAB course or not, then call append_box()
 			*/
 	string day;	//let the parent fill this, and in capitals
-	std::vector<timebox> timelist;
+	std::vector<timebox> timelist;	//the day's list
 	/*static*/ float class_start, class_end, class_length, recess_start, recess_end;	//class_length seems more connected to timetable class
 	public:
 	    vector</*const */timebox*> tpoints;	//IMP_NOTE - THE CONST IS HIGHLY PROBLEMATIC HERE!
@@ -147,7 +156,7 @@ class daylist{
 		void set_tpoints();
 		void show_tpoints();	//FOR DEBUG PURPOSES
 		void make_tlist();
-		void make_sample_tlist(void);
+		void set_Testmode_tlist(void);
 //Added on 25 DECEMBER 2019, after >7 days try
 		void load_from_binary(std::ifstream*); //also calls set_tpoints() at end
 		void save_to_binary(std::ofstream*);
@@ -156,9 +165,16 @@ class daylist{
 //		bool isLabCourse(string);
 		void update_box(int);	//Takes the number of box... then utilize tpoints[8]
 		void reset_records(void);	//to be used before loading from file
+		void DEBUG_show_timelist(void);	//to see difference between tpoints and the timelist
 		daylist();
 		~daylist();                   
 };
+
+void daylist::DEBUG_show_timelist(){
+	for(int i=0; i<timelist.size(); ++i){
+		cout<<timelist[i].starttime<<" - "<<timelist[i].endtime<<" == "<<timelist[i].get_coursecode()<<endl;
+	}
+}
 
 void daylist::reset_records(){
 	day.clear();
@@ -173,12 +189,16 @@ void daylist::reset_records(){
 
 void daylist::show_tpoints(){
 	for( const timebox* box : tpoints){
-		cout<<box->get_coursecode();
+		if(box == NULL){
+			cout<<"NULL"<<endl;
+			continue;
+		}
+		cout<<box->starttime<<" - "<<box->endtime<<" == "<<box->get_coursecode();
 		cout<<endl;
 	}
 }
 
-class timetable{
+class timetable{	//TODO - Add Check in all methods of timetable, where it asks for choices.... IT IS NOT WORKING IN DISPLAY() CHECK IT
 	bool state;		//'state' data member tells if it has been entered or not
 	string savefile,txtfile,recallfile;	//Change these to department name + gp name, after user changes dept or grp
 	string dept,grp;
@@ -196,7 +216,7 @@ class timetable{
 		void display(void);	//change due to generalization
 //[Replaced]		void loadfrom_file(void);
 		void fill(void);
-		void sample_fill(void);
+		void tt_Testmode(void);
 		void settings(void);
 //27 December 2019... made mainmenu() take a parameter mainmenu_retval, which when 0, signals all previous mainmenu() to exit
         int mainmenu(bool = true);
@@ -209,16 +229,57 @@ class timetable{
 //Suggested on 26 DECEMBER 2019
         /*[INITIAL SETUP]Have option and elements to take in time of start of the day, and if same for all days left, press y... and in time of end of the day, and if same for all days left to enter
         And also the time of recess, and if same for all*/
+		bool isFilled(void) const;
         timetable();
 		~timetable();
 };
 
-void timetable::sample_fill(){
+bool timetable::isFilled() const{
+	return state;
+}
+
+void timetable::tt_Testmode(){
+	ndays = 6;
+	if(ndays != day.size()){
+		if(ndays > day.size()){
+			daylist new_day;
+			for(int i=ndays - day.size(); i>0; i--){
+				day.emplace_back(new_day);
+			}
+		}
+		else{	//ie. day.size() is already more than ndays
+			day.resize(ndays);
+		}
+	}
+
+	string dayname;
+	for(int i=0;i<ndays;i++){
+		switch(i){
+			case 0: dayname = "Monday"; break;
+			case 1: dayname = "Tuesday"; break;
+			case 2: dayname = "Wednesday"; break;
+			case 3: dayname = "Thursday"; break;
+			case 4: dayname = "Friday"; break;
+			case 5: dayname = "Saturday"; break;
+			case 6: dayname = "Sunday"; break;
+		}
+		day[i].set_Day(dayname);
+	}
+
 	for (int i = 0; i < ndays; i++)
 	{
-		day[i].make_sample_tlist();
+		day[i].set_Testmode_tlist();
 	}
-	
+
+	set_total_courses();
+
+	state = true;
+	savefile = "BinaryTimeTable.dat";
+	txtfile = "TimeTable.txt";
+	recallfile = "BinaryTimeTable.dat";
+	dept = "CSE";
+	grp = "A1";
+
 }
 
 //RECORDS.CPP classes START
@@ -251,6 +312,7 @@ void irecbox::change_coursecode(string s){
 
 
 class a_register{
+	//FUTURE - Have username also in this class
 	bool setup_complete;
 					//FUTURE_NOTE - When we load the 'records_list' using the RECOVERconfig(), have a temporary copy, then change only those irecboxes that have the courcesoce present, in the records_list set by set_total_today_array()
 	vector<irecbox> records_list;	//total list
@@ -258,6 +320,7 @@ class a_register{
 //    irecbox **todaylist;	//Make 'array of pointers' using a_register::(*table).total_courses
 	vector<irecbox*> todaylist;	//its elements aren't 'irecbox' but only pointers, since it can just point to records_list elements
 public:
+	int num_SavedTimetables;
 	timetable table;	//links with table selected during initial setup
 	//Read from the config file, and the table file (that too read from config file), and then load the table with that file name, then link with this
 //	void get_initstatus();	//sets setup_complete
@@ -265,6 +328,7 @@ public:
 						//recovers from Attendance_Register.conf file...
 						//	It will store : setup_complete, table_name, timetable::total_courses (not of today; that will be set by function),
 						//					a_register data (of irecboxes)
+						// If config file not found, OR even after RECOVER, the setup_complete bool is false, then ensureInitStatus() will be called
 
 //	void settings();	//FUTURE
 	void totaldisplay(void);
@@ -273,18 +337,61 @@ public:
 	void parseInput(string);	//Updates the records with the given input
 								//trear as yynny, or YNN, or YnnNy, or Y10nn1... ie. check each digit individualy == 'y' || 'Y' || '1'
 	void set_total_today_array(void);
-	irecbox* find_irecbox(string);	//finds in records_list()
+	irecbox* find_irecbox(string);	//finds in records_list
 	bool already_present_in_todaylist(string);
 	bool already_present_in_recordslist(string);
+	void ensure_InitStatus(void);	//Checks whether initial setup complete or not
+	void newWelcome(void);	//For first time use (ie. table not set)
+	void set_num_SavedTimetables(void);	//Sees how many '.table' files are available in 'Timetables' folder
+	void listTimetables(void);	//this can and will set the num_SavedTimetables integer, but still setter method for that is also required
+//	void WelcomeScreen(void);	//asks for attendance, then calls parseString
+	void set_up_TestMode(void);
 	a_register();
 	~a_register();
 };
 
-int main(int argc, char const *argv[]){
+void a_register::set_up_TestMode(){
+	table.tt_Testmode();
+	setup_complete = true;
+	set_total_today_array();//cAUSING SEGFAULT
+	set_num_SavedTimetables();
+}
 
-	std::ios_base::sync_with_stdio(false);	//disables sync between C and C++ standard streams
+void a_register::listTimetables(){
+/*	namespace fs = std::filesystem;
+	int count = 0;
+	string path_to_directory = "./tables";
+	for(const auto &entry : fs::directory_iterator(path_to_directory)){
+		if(!entry.is_directory()){
+			++count;
+			cout<<count<<". "<<entry.path().filename().string()<<endl;	//type of entry 'should' (check in linux, the return type) be of type directory_entry
+												//check what these path(), filename(), string() return (in Linux)
+		}
+	}
+	num_SavedTimetables = count;
+*/}
 
-	int i;
+void a_register::set_num_SavedTimetables(){
+/*	#if __cplusplus >= 201402
+		std::filesystem;
+	#else
+		boost::filesystem;
+	#endif
+*/
+/*	num_SavedTimetables = 0;
+	string path_to_tables_dir = "./tables";
+	for(const auto &entry : std::filesystem::directory_iterator(path_to_tables_dir)){
+		if(!entry.is_directory()){
+			++num_SavedTimetables;
+		}
+	}
+*/}
+
+void a_register::newWelcome(){
+	
+	if(setup_complete)
+		return;
+
 	string icommand;
 	#ifdef __linux__
 		system("clear");
@@ -293,11 +400,96 @@ int main(int argc, char const *argv[]){
 	#endif
 
 	set_h_w();
+
+	prt_t_header();
+	greeting(name);
+
+	int i;
+	string welcome_msg;
+	welcome_msg = "Welcome to the attendance register, first enter/chose the timetable :-)";
+
+	if(terminal_width<115){
+		std::cout<<'\n';
+	}
+	else std::cout<<"\n\n";
+	if(terminal_width > 71){
+		for(i=0;i<(terminal_width/2 - 3 - 35); i++) std::cout<<' ';
+		std::cout<<welcome_msg;
+	}
+	else{
+		int i = welcome_msg.size()/terminal_width;
+		while(i--){
+			int j = terminal_width;
+			while(j--)	std::cout<<welcome_msg[terminal_width-i];
+			std::cout<<std::endl;
+		}
+
+		i = terminal_width * int(welcome_msg.size()/terminal_width);
+		for(int j=0; j<(welcome_msg.size() - i)/2;)	std::cout<<' ';
+		while(i++ < welcome_msg.size())
+			std::cout<<welcome_msg[i];
+	}
+	set_num_SavedTimetables();
+	if(num_SavedTimetables == 0){
+		std::cout<<"No saved timetables found! Press any key to proceed to filling the timetable...  ";
+		char ignoreChar;
+		std::cin>>noskipws>>ignoreChar;
+		table.fill();
+		set_total_today_array();
+
+
+	}
+	else{
+		std::cout<<"Press any key to proceed to Timetable Selection, or Entering it...  ";
+		char ignoreChar;
+		std::cin>>noskipws>>ignoreChar;
+	}
+
+	//After completion
+	setup_complete = true;
+}
+
+void a_register::ensure_InitStatus(){
+	RECOVERconfig();
+	if(table.isFilled() == false){
+		newWelcome();
+	}
+}
+
+int main(int argc, char const *argv[]){
+
+	std::ios_base::sync_with_stdio(false);	//disables sync between C and C++ standard streams
+
+	int i;
+	string icommand;
+
+	/*Before this line itself, the debugger shows us that there are 3 threads
+	[New Thread 7008.0x1db0]
+	[New Thread 7008.0xcdc]
+	[New Thread 7008.0x1010]
+
+	And after i chose exit in the timetable::mainmenu() in the 1st run of that function itself, it shows these :
+	[New Thread 7008.0x1c48]
+	[New Thread 7008.0x25e0]
+	[New Thread 7008.0x114c]
+	[New Thread 7008.0x500]
+	[New Thread 7008.0x145c]
+	[Inferior 1(process 7008) exited normally]
+
+	//QUESTION - But what does this mean anyway? Is it multi-threading ?
+	*/
+	#ifdef __linux__
+		system("clear");
+	#else
+		system("cls");
+	#endif
+
+	set_h_w();
 	
-//	a_register register_object;
 	a_register all_records;
-	all_records.table.mainmenu();
-	//register_object.check_initstatus();	//Checks whether initial setup complete or not
+	all_records.set_up_TestMode();
+//	all_records.RECOVERconfig();
+//	all_records.ensure_InitStatus();
 
 	prt_t_header();
 	greeting(name);
@@ -331,16 +523,13 @@ int main(int argc, char const *argv[]){
 			std::cout<<s;
 		}
 	/*ONLY AFTER SUCCESS of ParseInput()*/
-		//vibrate("Records Updated!");
-		system("clear");
-		prt_t_header();
-		greeting(name);
-		if(terminal_width<115){
-			std::cout<<'\n';
-		}
-		else std::cout<<"\n\n";
-		vibrate("Records Updated!");
+//		vibrate("Records Updated!");
+		std::cout<<"\nPress any key to continue...  ";
+		std::cout<<std::endl;
+		char ignoreChar;
+		std::cin>>std::noskipws>>ignoreChar;
 	}
+	return 0;
 }
 
 //main_frontend.cpp funtions START
@@ -443,7 +632,7 @@ void magnify(string pos, string *small_str, string *big_str){	//FUTURE - pos may
         	for(j=0;j<spac+msglen-1;j++) std::cout<<" ";
         	for(k=0;k<big_str->size();k++){
             	if((*big_str)[k]==' ') std::cout<<"   ";
-            	else std::cout<<big[(int)((*big_str)[k])-65][i];
+            	else std::cout<<bigChar[(int)((*big_str)[k])-65][i];
             	std::cout<<" ";
         	}
         	std::cout<<'\n';   
@@ -453,13 +642,13 @@ void magnify(string pos, string *small_str, string *big_str){	//FUTURE - pos may
         	for(j=0;j<spac;j++) std::cout<<" ";
         	for(k=0;k<small_str->size();k++){
             	if((*small_str)[k]==' ') std::cout<<' ';
-            	else std::cout<<small[(int)((*small_str)[k])-65][i-4];
+            	else std::cout<<smallChar[(int)((*small_str)[k])-65][i-4];
             	std::cout<<' ';
         	}
         	std::cout<<"   ";
         	for(k=0;k<big_str->size();k++){
             	if((*big_str)[k]==' ') std::cout<<"   ";
-            	else std::cout<<big[(int)((*big_str)[k])-65][i];
+            	else std::cout<<bigChar[(int)((*big_str)[k])-65][i];
             	std::cout<<' ';
         	}
         	std::cout<<'\n';   
@@ -471,13 +660,13 @@ void magnify(string pos, string *small_str, string *big_str){	//FUTURE - pos may
         	for(j=0;j<spac;j++) std::cout<<" ";
         	for(k=0;k<small_str->size();k++){
             	if((*small_str)[k]==' ') std::cout<<' ';
-            	else std::cout<<small[(int)((*small_str)[k])-65][i];
+            	else std::cout<<smallChar[(int)((*small_str)[k])-65][i];
             	std::cout<<' ';
         	}
         	std::cout<<"   ";
         	for(k=0;k<big_str->size();k++){
             	if((*big_str)[k]==' ') std::cout<<"   ";
-            	else std::cout<<small[(int)((*big_str)[k])-65][i];
+            	else std::cout<<smallChar[(int)((*big_str)[k])-65][i];
             	std::cout<<' ';
         	}
         	std::cout<<'\n';   
@@ -496,7 +685,7 @@ void magnify(string pos, string *big_str){	//FUTURE - pos maybe "start","mid","e
 		for(j =0 ; j<spac ;j++) std::cout<<' ';
     	for(k=0;k<big_str->size();k++){
         	if((*big_str)[k]==' ') std::cout<<"   ";
-        	else std::cout<<big[(int)((*big_str)[k])-65][i];
+        	else std::cout<<bigChar[(int)((*big_str)[k])-65][i];
         	std::cout<<" ";
     	}
     	std::cout<<'\n';   
@@ -514,7 +703,7 @@ void smaller_magnify(string pos, string *small_str){	//For understanding the rea
 		for(j=0;j<spac;j++) std::cout<<" ";
 		for(k=0;(*small_str)[k]!='\0';k++){
 	    	if((*small_str)[k]==' ') std::cout<<' ';
-	    	else std::cout<<small[(int)((*small_str)[k])-65][i];
+	    	else std::cout<<smallChar[(int)((*small_str)[k])-65][i];
 	    	std::cout<<' ';
 		}
 		std::cout<<'\n';
@@ -542,7 +731,13 @@ void vibrate(string msg){	//Doesn't actually vibrate, as visulaization expected
 	//for(int i=0;i<(5*msg.size());++i){
 	while(amp_diff != 0){
 		for(int i=0;i<2*amp_diff + msg.size() -1;++i){
-			system("clear");
+
+/*			#ifdef __linux__
+				system("clear");
+			#else
+				system("cls");
+			#endif
+*/
 			prt_t_header();
 			greeting(name);
 /*			std::cout<<amp_diff;
@@ -559,9 +754,9 @@ void vibrate(string msg){	//Doesn't actually vibrate, as visulaization expected
 			std::cout<<std::endl;
 			
 			#ifdef __linux__
-				usleep(30000);
+				usleep(300000);
 			#else
-				Sleep(30000);
+				Sleep(300000);
 			#endif
 
 			if(dir){
@@ -589,17 +784,22 @@ void vibrate(string msg){	//Doesn't actually vibrate, as visulaization expected
 timetable::timetable(){
 			state=false;
 			ndays=5;
+			daylist new_day;
+			int i=ndays;
+			while(i--){
+				day.emplace_back(new_day);
+			}
 			total_courses=0;
 			string dayname;
 			for(int i=0;i<ndays;i++){
 				switch(i){
-					case 0: dayname = "Monday";
-					case 1: dayname = "Tuesday";
-					case 2: dayname = "Wednesday";
-					case 3: dayname = "Thursday";
-					case 4: dayname = "Friday";
-					case 5: dayname = "Saturday";
-					case 6: dayname = "Sunday";
+					case 0: dayname = "Monday"; break;
+					case 1: dayname = "Tuesday"; break;
+					case 2: dayname = "Wednesday"; break;
+					case 3: dayname = "Thursday"; break;
+					case 4: dayname = "Friday"; break;
+					case 5: dayname = "Saturday"; break;
+					case 6: dayname = "Sunday"; break;
 				}
 				day[i].set_Day(dayname);
 			}
@@ -618,13 +818,17 @@ int timetable::mainmenu(bool mainmenu_retval){
 		return 0;
 	}
 
-	time_t t = time(0);
-	time_now = *localtime(&t);
+	refresh_time();
 
 	int i=0;
 	positive ch;
 	do{
-		system("clear");
+		#ifdef __linux__
+			system("clear");
+		#else
+			system("cls");
+		#endif
+
 		/*Printing Intro*/
 		prt_t_header();
 		set_h_w();
@@ -634,17 +838,17 @@ int timetable::mainmenu(bool mainmenu_retval){
 		for (i = 0; i < terminal_height/7; ++i)
 			std::cout<<std::endl;
 		int space = (terminal_width - 97)/2;
-	for(i=0;i<space;i++) std::cout<<' ';
-		std::cout<<"----- ----- \\   / ----- ----- /---\\ |---\\ |     -----   \\   / /---\\ \\   | /---\\ |---- ----- |---\\\n";
-	for(i=0;i<space;i++) std::cout<<' ';
-		std::cout<<"  |     |   |\\ /| |       |   |   | |   / |     |       |\\ /| |   | |\\  | |   | |     |     |   |\n";
-    for(i=0;i<space;i++) std::cout<<' ';
-		std::cout<<"  |     |   | - | |--     |   |---| |---  |     |--     | - | |---| | \\ | |---| |  -| |--   |---/\n";
-    for(i=0;i<space;i++) std::cout<<' ';
-		std::cout<<"  |     |   |   | |       |   |   | |   \\ |     |       |   | |   | |  \\| |   | |   | |     |  \\ \n";
-    for(i=0;i<space;i++) std::cout<<' ';
-		std::cout<<"  |   ----- |   | -----   |   |   | |---/ |---- -----   |   | |   | |   \\ |   | |---| ----- |   \\\n\n";
-	for(i=0;i<space-1;i++) std::cout<<' ';
+		for(i=0;i<space;i++) std::cout<<' ';
+			std::cout<<"----- ----- \\   / ----- ----- /---\\ |---\\ |     -----   \\   / /---\\ \\   | /---\\ |---- ----- |---\\\n";
+		for(i=0;i<space;i++) std::cout<<' ';
+			std::cout<<"  |     |   |\\ /| |       |   |   | |   / |     |       |\\ /| |   | |\\  | |   | |     |     |   |\n";
+		for(i=0;i<space;i++) std::cout<<' ';
+			std::cout<<"  |     |   | - | |--     |   |---| |---  |     |--     | - | |---| | \\ | |---| |  -| |--   |---/\n";
+		for(i=0;i<space;i++) std::cout<<' ';
+			std::cout<<"  |     |   |   | |       |   |   | |   \\ |     |       |   | |   | |  \\| |   | |   | |     |  \\ \n";
+		for(i=0;i<space;i++) std::cout<<' ';
+			std::cout<<"  |   ----- |   | -----   |   |   | |---/ |---- -----   |   | |   | |   \\ |   | |---| ----- |   \\\n\n";
+		for(i=0;i<space-1;i++) std::cout<<' ';
 		std::cout<<"===================================================================================================\n";
 		std::cout<<"The Manager that actually works.. and is FAST... bcz it \"JUST\" works ;)\n"
 		    <<"Programmer - Aditya Gupta (aka. Techy15)"
@@ -658,6 +862,9 @@ int timetable::mainmenu(bool mainmenu_retval){
 		    <<"\n7. Exit \n";
 		std::cin>>ch;
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max() , '\n');	//WILL NOT BE NEEDED, if sync b/w the streams is turned on
+		if(ch == 0){	//NOTE - Protection from user entering a string, character etc, instead of integer, the value given to the integer is 0
+			ch = 10;
+		}
 	}while(ch>7);
 	switch(ch){
 		case 1: fill(); break;
@@ -682,7 +889,13 @@ int timetable::mainmenu(bool mainmenu_retval){
 void timetable::settings(){
 	positive ch = 1;
 	while(ch<6){
-		system("clear");
+
+		#ifdef __linux__
+			system("clear");
+		#else
+			system("cls");
+		#endif
+		
 		std::cout<<"\nSETTINGS\n---------\n"
 		    <<"\n1. Change name of save_file"
 		    <<"\n2. Change name of save_txtfile"
@@ -780,7 +993,13 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 	 * 	    maybe by uupdating data member in the class, named ndays*/
 
 	refresh_time();
-	system("clear");
+	
+	#ifdef __linux__
+		system("clear");
+	#else
+		system("cls");
+	#endif
+
 	int i=0, j=0, k=0;
 	//[DONE]Display time and day here, course code etc
 
@@ -813,7 +1032,7 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 		std::cout<<'-';
 	std::cout<<"||\n";
 
-	for( i=0 ; i<5 ;i++ )	//for block prints shedule of a compelete day
+	for( i=0 ; i<ndays ;i++ )	//for block prints shedule of a compelete day
 	{	
 		std::cout<<"||";
 		switch(i){			//switch block  prints the day name
@@ -822,10 +1041,11 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 			case 2: std::cout<<"Wednesday  "; break;
 			case 3: std::cout<<"Thursday   "; break;
 			case 4: std::cout<<"Friday     "; break;
+			case 5: std::cout<<"Saturday   "; break;
 		}
 		std::cout<<'|';
 		int len=0;
-		for( j=0 ; j<4 ; ++j ){
+		for( j=0 ; j<4 ; ++j ){	//first half
 			if( ret_day(i)->tpoints[j] != NULL ){
 //				len = d[i].tpoints[j]->get_coursecode()->size();	//Display CourseCode
 				len = ret_day(i)->tpoints[j]->get_coursecode().size();
@@ -846,9 +1066,10 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 			case 2 : std::cout<<'E'; break;
 			case 3 : std::cout<<'A'; break;
 			case 4 : std::cout<<'K'; break;
+			case 5 : std::cout<<' '; break;
 		}
 		std::cout<<"    |";
-		for( j=4 ; j<8 ; ++j ){
+		for( j=5 ; j<9 ; ++j ){	//Changed limits after making the tpoints to have the recess box also
 			if( ret_day(i)->tpoints[j] != NULL ){
 //				len = d[i].tpoints[j]->get_coursecode().size();	//Display CourseCode
 				len = ret_day(i)->tpoints[j]->get_coursecode().size();
@@ -878,6 +1099,9 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 	do{
 		std::cout<<"\nWhat Next?\n1. Save to text file\n2. Go back to main menu\n";
 		std::cin>>ch;
+		if(ch == 0){	//NOTE - Protection from user entering a string, character etc, instead of integer, the value given to the integer is 0
+			ch = 10;
+		}
 	}while(ch!=1 && ch!=2);
 
 	if(ch==1)	savetxt();
@@ -1115,7 +1339,7 @@ void timebox::change_coursecode(string sptr){
 	coursecode = sptr;
 }
 
-void timebox::change_coursecode(char* sptr){
+void timebox::change_coursecode(const char* sptr){
 	coursecode = *sptr;
 }
 
@@ -1137,7 +1361,7 @@ void daylist::set_tpoints(){	//NOTE - only used by display function, else no hin
 	if(ceil((class_end - recess_end)/class_length) != int((class_end - recess_end)/class_length)){
 		class_end -= fmod(class_end - recess_end,class_length);
 	}
-	int class_boxes = int((recess_start - class_start)/class_length) + int((class_end - recess_end)/class_length);
+	int class_boxes = int((recess_start - class_start)/class_length) + 1 + int((class_end - recess_end)/class_length);
 	
 	int i=0, j=0, k=0;
 	timebox *box_ptr = NULL;
@@ -1157,7 +1381,11 @@ void daylist::set_tpoints(){	//NOTE - only used by display function, else no hin
 			//after recess
 			j = (timelist[i].endtime - timelist[i].starttime)/class_length;
 			for(k=0; k<j; ++k){
-				tpoints[int((timelist[i].starttime - recess_end + recess_start - class_start)/class_length) + k] = &timelist[i];
+				tpoints[int((timelist[i].starttime - recess_end + recess_start - class_start)/class_length) + k + 1] = &timelist[i];	//[DEBUG] Check if the '+1' I added is consistent with other cases too, like length 2 hours etc???
+				if(tpoints.size() < int((timelist[i].starttime - recess_end + recess_start - class_start)/class_length) + k){
+					cout<<"Size is smaller";
+					cout<<endl;
+				}
 			}
 		}
 	}
@@ -1223,40 +1451,49 @@ void daylist::make_tlist(){
 	set_tpoints();
 }
 
-void daylist::make_sample_tlist(){
-	int i=class_start;
+void daylist::set_Testmode_tlist(){
+	timelist.clear();
+	float i=class_start;
 	bool tbox_extend_flag;
 	string s;
     short mins_start, mins_end;
     bool am_pm_start, am_pm_end;
 	for(i=class_start;i<class_end;i+=class_length){
-		if( (i+class_length >= recess_start) && (i+class_length <= recess_end) ){
+		if( (i+class_length > recess_start) && (i+class_length <= recess_end) ){
 			timebox recess_box;
 			recess_box.box_type = false;
+			recess_box.starttime = recess_start;
+			recess_box.endtime = recess_end;
+			recess_box.change_coursecode("---");
 			timelist.push_back(recess_box);
 
-			i = recess_end;
+			i = recess_end - class_length;
 			continue;
 		}
+		else{
+			int j;
+			string s;
 
-		int i;
-		string s;
-		refresh_time();
-		i = (time_now.tm_sec)%26;
-		s.push_back(65 + i);
-		for(int j=0; j<4; ++j){
-			refresh_time();
-			i = (time_now.tm_sec)%26;
-			s.push_back(97 + i);
+			s = "CS2401";
+/*			refresh_time();
+			j = (time_now.tm_sec)%26;
+			s.push_back(65 + j);
+			for(j=0; j<4; ++j){
+				refresh_time();
+				j = (time_now.tm_sec)%26;
+				s.push_back(97 + j);
+			}
+*/			
+			timebox new_box;
+			new_box.change_coursecode(s);
+			new_box.starttime = i;
+			new_box.endtime = i + class_length;
+			new_box.set_sub();				
+			timelist.push_back(new_box);
 		}
-		timebox new_box;
-		new_box.change_coursecode(s);
-		new_box.starttime = i;
-		new_box.endtime = i + class_length;
-		new_box.set_sub();				
-		timelist.push_back(new_box);
 	}
 	set_tpoints();
+
 }
 
 void daylist::save_to_binary(std::ofstream* fsave){
@@ -1324,7 +1561,8 @@ void daylist::set_Day(string daystr){
 }
 
 void a_register::parseInput(string parseString){
-	if(parseString.size() > todaylist.size()){
+	set_total_today_array();
+	if(parseString.size() > todaylist.size()){	//to ignore additional characters
 		parseString.erase(todaylist.size(), parseString.size() -1);
 	}
 	for(int i=0; i<parseString.size(); ++i){
@@ -1412,9 +1650,10 @@ bool a_register::already_present_in_recordslist(string query_str){
 
 
 irecbox* a_register::find_irecbox(string search_str){
-	for(int i; i<records_list.size(); ++i){
-		if(records_list[i].get_coursecode() == search_str)
+	for(int i=0; i<records_list.size(); ++i){
+		if(records_list[i].get_coursecode() == search_str){
 			return &records_list[i];
+		}
 	}
 	return NULL;
 }
@@ -1427,14 +1666,18 @@ void a_register::set_total_today_array(){
 		the_day = table.ret_day(i);
 		for(j=0; j<the_day->tpoints.size(); ++j){
 			if(the_day->tpoints[j] != NULL){
+				if(the_day->tpoints[j]->box_type == false)
+					continue;
 				if( !already_present_in_recordslist( the_day->tpoints[j]->get_coursecode() )){	//ie. not found
 					irecbox new_rec_box;
 					new_rec_box.change_coursecode(the_day->tpoints[j]->get_coursecode());
 					records_list.push_back(new_rec_box);
+//					cout<<"[DEBUG]Size of Records_List - "<<records_list.size()<<endl;
 				}
 			}
 		}
 	}
+	refresh_time();
 	the_day = table.ret_day((time_now.tm_wday + 1)%6);	//It is days since Sunday (ie. 0-6), and i converted to days since Monday
 	if(the_day == NULL){
 		return;
@@ -1442,10 +1685,18 @@ void a_register::set_total_today_array(){
 	else{
 		for(j=0; j<the_day->tpoints.size(); ++j){
 			if(the_day->tpoints[j] != NULL){
+				if( the_day->tpoints[j]->box_type == false )
+					continue;
 				if( !already_present_in_todaylist( the_day->tpoints[j]->get_coursecode() )){
+//					cout<<"[DEBUG]Reached inside for the coursecode - "<<the_day->tpoints[j]->get_coursecode()<<endl;
 					irecbox *rec_box_ptr = NULL;
 					rec_box_ptr = find_irecbox( the_day->tpoints[j]->get_coursecode());
-					todaylist.push_back(rec_box_ptr);
+					if(rec_box_ptr != NULL){
+						todaylist.push_back(rec_box_ptr);
+					}
+					else{
+//						cout<<"[DEBUG]rec_box is NULL for "<<the_day->tpoints[j]->get_coursecode()<<endl;
+					}
 				}
 			}
 		}
@@ -1454,7 +1705,8 @@ void a_register::set_total_today_array(){
 }
 
 a_register::a_register(){
-
+	num_SavedTimetables = 0;
+	setup_complete = true;
 }
 
 a_register::~a_register(){
