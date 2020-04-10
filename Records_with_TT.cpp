@@ -63,6 +63,8 @@ FUTURE - "Any Special notes for this day (1 or 0)? ";*/
 */
 #include<experimental/filesystem>
 
+#define testMode true
+
 #ifdef _WIN32	//Macro defined by MSVC (Microsoft Visual C++) compiler (not g++)
 	#include <windows.h>
 #elif __linux__
@@ -77,9 +79,16 @@ FUTURE - "Any Special notes for this day (1 or 0)? ";*/
 
 using namespace std;
 
+/*
+
+
+
+*/
+
 tm time_now;
-string bigChar[26][8]={{"---------","|  ---  |","|  | |  |","|  ---  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"--------\\","|  ---  |","|  | |  |","|  ---  /","|  ---  \\","|  | |  |","|  ---  |","--------/"},{"--------\\","|       |","|  -----/","|  |     ","|  |     ","|  -----\\","|       |","--------/"},{"--------\\","|  ---\\ |","|  |  | |","|  |  | |","|  |  | |","|  |  | |","|  ---/ |","--------/"},{"---------","|       |","|  ------","|  --\\   ","|  --/   ","|  ------","|       |","---------"},{"---------","|       |","|  ------","|  |     ","|  ====  ","|  |     ","|  |     ","----     "},{"--------\\","|       |","|  -----/","|  |     ","|  \\=====","|    |  |","|    |  |","-----/  |"},{"---   ---","| |   | |","| |   | |","| ----- |","| ----- |","| |   | |","| |   | |","---   ---"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","|--- ---|","---------"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","/--- -   ","|----/   "},{"---   ---","| |  / / ","| | / /  ","| /  /   ","| \\  \\   ","| | \\ \\  ","| |  \\ \\ ","---   ---"},{"---      ","| |      ","| |      ","| |      ","| |      ","| |      ","|--- ---|","\\-------|"},{"---   ---","|  \\ /  |","|       |","|  \\ /  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"---   ---","|\\\\   | |","| \\\\  | |","| |\\\\ | |","| | \\\\| |","| |  \\\\ |","| |   \\\\|","---   ---"},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| |   | |","| ----- |","---------"},{"---------","| ----- |","| |   | |","| -----/ ","| |      ","| |      ","| |      ","---      "},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| =======","| ======|","---------"},{"---------","| ----- |","| |   | |","| ----- /","| |\\  \\  ","| | \\  \\ ","| |  \\  \\","---   ---"},{"---------","| |      ","| |      "," \\ --- \\ ","      | |","      | |","|--- ---|","\\-------|"},{"---------","---| |---","   | |   ","   | |   ","   | |   ","   | |   ","   | |   ","   ---   "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","| |   | |","\\ ----- /"," ------- "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","\\ \\   / /"," \\  -  / ","  -----  "},{"--     --","||     ||","||     ||","||     ||","||     ||","\\\\  |  //"," \\\\/ \\// ","  -   -  "},{"--     --"," \\\\   // ","  \\\\ //  ","   \\ /   ","   / \\   ","  // \\\\  "," //   \\\\ ","--     --"},{"---   ---","\\ \\   / /"," \\ \\ / / ","  \\   /  ","   | |   ","   | |   ","   | |   ","   ---   "},{"---------","-------/ ","     //  ","    //   ","   //    ","  //     "," /-------","---------"}};
-string smallChar[26][4]={{"----","|  |","|--|","|  |"},{"----","|__|","|  |","----"},{"----","|   ","|   ","----"},{"---\\","|  |","|  |","---/"},{"----","|__ ","|   ","----"},{"----","|__ ","|   ","|   "},{"----","|   ","| -|","---|"},{"|  |","|__|","|  |","|  |"},{"----"," || "," || ","----"},{" ---","   |","   |","---/"},{"|  /","|/  ","|\\  ","|  \\"},{"|   ","|   ","|   ","----"},{"|  |","|\\/|","|  |","|  |"},{"|  |","|\\ |","| \\|","|  \\"},{"/--\\","|  |","|  |","\\--/"},{"/--\\","|__|","|   ","|   "},{"|--|","|  |","| \\|","|--\\"},{"/--\\","|__|","|\\  ","| \\ "},{"/--\\","|__","   |","\\--/"},{"----"," || "," || "," || "},{"|  |","|  |","|  |","|__|"},{"|  |","|  |","\\  /"," \\/ "},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /  ","/   "},{"/---","  / "," /  ","---/"}};
+//the 27th character is '?'
+string bigChar[27][8]={{"---------","|  ---  |","|  | |  |","|  ---  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"--------\\","|  ---  |","|  | |  |","|  ---  /","|  ---  \\","|  | |  |","|  ---  |","--------/"},{"--------\\","|       |","|  -----/","|  |     ","|  |     ","|  -----\\","|       |","--------/"},{"--------\\","|  ---\\ |","|  |  | |","|  |  | |","|  |  | |","|  |  | |","|  ---/ |","--------/"},{"---------","|       |","|  ------","|  --\\   ","|  --/   ","|  ------","|       |","---------"},{"---------","|       |","|  ------","|  |     ","|  ====  ","|  |     ","|  |     ","----     "},{"--------\\","|       |","|  -----/","|  |     ","|  \\=====","|    |  |","|    |  |","-----/  |"},{"---   ---","| |   | |","| |   | |","| ----- |","| ----- |","| |   | |","| |   | |","---   ---"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","|--- ---|","---------"},{"---------","|--- ---|","   | |   ","   | |   ","   | |   ","   | |   ","/--- -   ","|----/   "},{"---   ---","| |  / / ","| | / /  ","| /  /   ","| \\  \\   ","| | \\ \\  ","| |  \\ \\ ","---   ---"},{"---      ","| |      ","| |      ","| |      ","| |      ","| |      ","|--- ---|","\\-------|"},{"---   ---","|  \\ /  |","|       |","|  \\ /  |","|  | |  |","|  | |  |","|  | |  |","---- ----"},{"---   ---","|\\\\   | |","| \\\\  | |","| |\\\\ | |","| | \\\\| |","| |  \\\\ |","| |   \\\\|","---   ---"},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| |   | |","| ----- |","---------"},{"---------","| ----- |","| |   | |","| -----/ ","| |      ","| |      ","| |      ","---      "},{"---------","| ----- |","| |   | |","| |   | |","| |   | |","| =======","| ======|","---------"},{"---------","| ----- |","| |   | |","| ----- /","| |\\  \\  ","| | \\  \\ ","| |  \\  \\","---   ---"},{"---------","| |      ","| |      "," \\ --- \\ ","      | |","      | |","|--- ---|","\\-------|"},{"---------","---| |---","   | |   ","   | |   ","   | |   ","   | |   ","   | |   ","   ---   "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","| |   | |","\\ ----- /"," ------- "},{"---   ---","| |   | |","| |   | |","| |   | |","| |   | |","\\ \\   / /"," \\  -  / ","  -----  "},{"--     --","||     ||","||     ||","||     ||","||     ||","\\\\  |  //"," \\\\/ \\// ","  -   -  "},{"--     --"," \\\\   // ","  \\\\ //  ","   \\ /   ","   / \\   ","  // \\\\  "," //   \\\\ ","--     --"},{"---   ---","\\ \\   / /"," \\ \\ / / ","  \\   /  ","   | |   ","   | |   ","   | |   ","   ---   "},{"---------","-------/ ","     //  ","    //   ","   //    ","  //     "," /-------","---------"},{"         ","         ","  /---\\  ","  |   |  ","     /   ","    /    ","    |    ","    O    "}};
+string smallChar[27][4]={{"----","|  |","|--|","|  |"},{"----","|__|","|  |","----"},{"----","|   ","|   ","----"},{"---\\","|  |","|  |","---/"},{"----","|__ ","|   ","----"},{"----","|__ ","|   ","|   "},{"----","|   ","| -|","---|"},{"|  |","|__|","|  |","|  |"},{"----"," || "," || ","----"},{" ---","   |","   |","---/"},{"|  /","|/  ","|\\  ","|  \\"},{"|   ","|   ","|   ","----"},{"|  |","|\\/|","|  |","|  |"},{"|  |","|\\ |","| \\|","|  \\"},{"/--\\","|  |","|  |","\\--/"},{"/--\\","|__|","|   ","|   "},{"|--|","|  |","| \\|","|--\\"},{"/--\\","|__|","|\\  ","| \\ "},{"/--\\","|__","   |","\\--/"},{"----"," || "," || "," || "},{"|  |","|  |","|  |","|__|"},{"|  |","|  |","\\  /"," \\/ "},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /\\ ","/  \\"},{"\\  /"," \\/ "," /  ","/   "},{"/---","  / "," /  ","---/"},{"/---","\\  |","  / ","  o "}};
 string name = "Aditya Gupta";	//Will be taken from the records class
 int terminal_width = 169, terminal_height = 39;		// [DONE] FUTURE - Set this using some function
 
@@ -149,8 +158,9 @@ class daylist{
 			*/
 	string day;	//let the parent fill this, and in capitals
 	std::vector<timebox> timelist;	//the day's list
-	/*static*/ float class_start, class_end, class_length, recess_start, recess_end;	//class_length seems more connected to timetable class
 	public:
+	/*static*/ float class_start, class_end, class_length, recess_start, recess_end;	//class_length seems more connected to timetable class
+		int numBox;	//basically size of timelist, NOT_REQUIRED
 	    vector</*const */timebox*> tpoints;	//IMP_NOTE - THE CONST IS HIGHLY PROBLEMATIC HERE!
 //DECIDED_COMMENT - //WARNING - If wanting to dynamically allocate tpoints, change timetable::set_total_courses().. No need to dynamically allocate though
 		void set_tpoints();
@@ -163,22 +173,37 @@ class daylist{
 		void set_Day(string);	//25 Aug 2019 - Made 'day' private
 //Suggested on 26 DECEMBER 2019
 //		bool isLabCourse(string);
-		void update_box(int);	//Takes the number of box... then utilize tpoints[8]
 		void reset_records(void);	//to be used before loading from file
 		void DEBUG_show_timelist(void);	//to see difference between tpoints and the timelist
+		int getmaxCCLen(void);
+		const string get_Day(void) const;
 		daylist();
 		~daylist();                   
 };
 
+const string daylist::get_Day(void) const{
+	return day;
+}
+
+int daylist::getmaxCCLen(){
+	int maxCCLen = 0;
+	for(timebox &t : timelist){	//this line prevents this method from being const
+		if(t.get_coursecode().size() > maxCCLen)
+			maxCCLen = t.get_coursecode().size();
+	}
+	return maxCCLen;
+}
+
 void daylist::DEBUG_show_timelist(){
 	for(int i=0; i<timelist.size(); ++i){
-		cout<<timelist[i].starttime<<" - "<<timelist[i].endtime<<" == "<<timelist[i].get_coursecode()<<endl;
+		std::cout<<timelist[i].starttime<<" - "<<timelist[i].endtime<<" == "<<timelist[i].get_coursecode()<<std::endl;
 	}
 }
 
 void daylist::reset_records(){
 	day.clear();
 	timelist.clear();
+	numBox = 0;
 	tpoints.clear();
 	class_start = 8,5;
 	class_end = 17.5;
@@ -190,19 +215,19 @@ void daylist::reset_records(){
 void daylist::show_tpoints(){
 	for( const timebox* box : tpoints){
 		if(box == NULL){
-			cout<<"NULL"<<endl;
+			std::cout<<"NULL"<<std::endl;
 			continue;
 		}
-		cout<<box->starttime<<" - "<<box->endtime<<" == "<<box->get_coursecode();
-		cout<<endl;
+		std::cout<<box->starttime<<" - "<<box->endtime<<" == "<<box->get_coursecode();
+		std::cout<<std::endl;
 	}
 }
 
 class timetable{	//TODO - Add Check in all methods of timetable, where it asks for choices.... IT IS NOT WORKING IN DISPLAY() CHECK IT
 	bool state;		//'state' data member tells if it has been entered or not
-	string savefile,txtfile,recallfile;	//Change these to department name + gp name, after user changes dept or grp
+	string save_TTFile,txtfile;	//Change these to department name + gp name, after user changes dept or grp
 	string dept,grp;
-	vector<daylist> day;	//UPDATE_NOTE - Using vectors makes it easier to accomodate Saturdays and Sundays
+	vector<daylist> days;	//UPDATE_NOTE - Using vectors makes it easier to accomodate Saturdays and Sundays
 	public:		/*Future - Add functionality for 'n' temp-timetables (each for 1 day)... These will store Day,Date,Sub,time */
 		int ndays;	//For the basic part, don't change 'ndays'
 					//Made it public, so that a_register::update_num_courses() can access it
@@ -212,7 +237,7 @@ class timetable{	//TODO - Add Check in all methods of timetable, where it asks f
 //Added29th December, but all my work of 29th December was gone! So rewrote on 30th
 		vector<string> distinct_courses;	//Use set_total_courses()
 //[Replaced]        void save(void);
-		void savetxt(void);
+		void saveTXT(void);
 		void display(void);	//change due to generalization
 //[Replaced]		void loadfrom_file(void);
 		void fill(void);
@@ -232,6 +257,7 @@ class timetable{	//TODO - Add Check in all methods of timetable, where it asks f
 		bool isFilled(void) const;
         timetable();
 		~timetable();
+					//UPDATE_FUTURE - Instead of using set_Day() in constructor, give fill() ability to take custom number of days, and call set_Day() in it
 };
 
 bool timetable::isFilled() const{
@@ -240,15 +266,15 @@ bool timetable::isFilled() const{
 
 void timetable::tt_Testmode(){
 	ndays = 6;
-	if(ndays != day.size()){
-		if(ndays > day.size()){
+	if(ndays != days.size()){
+		if(ndays > days.size()){
 			daylist new_day;
-			for(int i=ndays - day.size(); i>0; i--){
-				day.emplace_back(new_day);
+			for(int i=ndays - days.size(); i>0; i--){
+				days.emplace_back(new_day);
 			}
 		}
 		else{	//ie. day.size() is already more than ndays
-			day.resize(ndays);
+			days.resize(ndays);
 		}
 	}
 
@@ -263,20 +289,19 @@ void timetable::tt_Testmode(){
 			case 5: dayname = "Saturday"; break;
 			case 6: dayname = "Sunday"; break;
 		}
-		day[i].set_Day(dayname);
+		days[i].set_Day(dayname);
 	}
 
 	for (int i = 0; i < ndays; i++)
 	{
-		day[i].set_Testmode_tlist();
+		days[i].set_Testmode_tlist();
 	}
 
 	set_total_courses();
 
 	state = true;
-	savefile = "BinaryTimeTable.dat";
+	save_TTFile = "BinaryTimeTable.dat";
 	txtfile = "TimeTable.txt";
-	recallfile = "BinaryTimeTable.dat";
 	dept = "CSE";
 	grp = "A1";
 
@@ -312,9 +337,15 @@ void irecbox::change_coursecode(string s){
 
 
 class a_register{
-	//FUTURE - Have username also in this class
+		//FUTURE_TODO - Have functions to convert the '.config', '.record', '.table' file to JSON
+	//[DONE]FUTURE - Have username also in this class
 	bool setup_complete;
+	string last_savedTTFile;	//TODO - After recovering this, try to restore the TT from that file, if it exists
+	string last_savedRecords;	//After recovering this, do same as above
+			//NOTE - the '.record' file will have name of the table file it used
+			//		iT WOuLD bE GooD FOr EAcH TT tO hAVE A UNiQue iD, to which the records will check whether its the same timetable, that was used to create it
 					//FUTURE_NOTE - When we load the 'records_list' using the RECOVERconfig(), have a temporary copy, then change only those irecboxes that have the courcesoce present, in the records_list set by set_total_today_array()
+	string user_name;
 	vector<irecbox> records_list;	//total list
 		//Put this array of pointers in this class, since it needs to access the a_register class list, but it can't from within a_register
 //    irecbox **todaylist;	//Make 'array of pointers' using a_register::(*table).total_courses
@@ -324,7 +355,7 @@ public:
 	timetable table;	//links with table selected during initial setup
 	//Read from the config file, and the table file (that too read from config file), and then load the table with that file name, then link with this
 //	void get_initstatus();	//sets setup_complete
-	void RECOVERconfig();	//IT MAY BE MADE A GLOBAL FUNCTION
+	bool RECOVERconfig(void);	//IT MAY BE MADE A GLOBAL FUNCTION
 						//recovers from Attendance_Register.conf file...
 						//	It will store : setup_complete, table_name, timetable::total_courses (not of today; that will be set by function),
 						//					a_register data (of irecboxes)
@@ -346,9 +377,17 @@ public:
 	void listTimetables(void);	//this can and will set the num_SavedTimetables integer, but still setter method for that is also required
 //	void WelcomeScreen(void);	//asks for attendance, then calls parseString
 	void set_up_TestMode(void);
+	void parseStringScreen(void);	//NOTE - May have to make as the mainmenu() function
+	void testModeScreen(void);
 	a_register();
 	~a_register();
 };
+
+void a_register::testModeScreen(){
+	set_up_TestMode();
+	table.display();
+	parseStringScreen();
+}
 
 void a_register::set_up_TestMode(){
 	table.tt_Testmode();
@@ -364,7 +403,7 @@ void a_register::listTimetables(){
 	for(const auto &entry : fs::directory_iterator(path_to_directory)){
 		if(!entry.is_directory()){
 			++count;
-			cout<<count<<". "<<entry.path().filename().string()<<endl;	//type of entry 'should' (check in linux, the return type) be of type directory_entry
+			std::cout<<count<<". "<<entry.path().filename().string()<<std::endl;	//type of entry 'should' (check in linux, the return type) be of type directory_entry
 												//check what these path(), filename(), string() return (in Linux)
 		}
 	}
@@ -402,9 +441,23 @@ void a_register::newWelcome(){
 	set_h_w();
 
 	prt_t_header();
-	greeting(name);
-
+	
 	int i;
+	string msg = "Hello", name = "Kaun?";
+	if( terminal_width >( 25 - 1*1 + 50 + 2 ))	//5*5 for "Hello", and 10*4 for "Kaun ?"
+    	for(i=0;i<(terminal_height/2 - 9);i++) std::cout<<'\n';	//-9 = -1 for height of header (time), and -8 for greeting
+  	else
+  		for(i=0;i<(terminal_height/2 - 5);i++) std::cout<<'\n';	//-9 = -1 for height of header (time), and -8 for greeting
+
+	magnify("mid",&msg,&name);	//+6 for 1 space... since, space took 4columns, while if it had been a character, it would have taken 10
+
+	string icommand;
+	#ifdef __linux__
+		system("clear");
+	#else
+		system("cls");
+	#endif
+
 	string welcome_msg;
 	welcome_msg = "Welcome to the attendance register, first enter/chose the timetable :-)";
 
@@ -433,7 +486,7 @@ void a_register::newWelcome(){
 	if(num_SavedTimetables == 0){
 		std::cout<<"No saved timetables found! Press any key to proceed to filling the timetable...  ";
 		char ignoreChar;
-		std::cin>>noskipws>>ignoreChar;
+		std::cin>>std::noskipws>>ignoreChar;
 		table.fill();
 		set_total_today_array();
 
@@ -442,7 +495,7 @@ void a_register::newWelcome(){
 	else{
 		std::cout<<"Press any key to proceed to Timetable Selection, or Entering it...  ";
 		char ignoreChar;
-		std::cin>>noskipws>>ignoreChar;
+		std::cin>>std::noskipws>>ignoreChar;
 	}
 
 	//After completion
@@ -453,6 +506,68 @@ void a_register::ensure_InitStatus(){
 	RECOVERconfig();
 	if(table.isFilled() == false){
 		newWelcome();
+	}
+}
+
+void a_register::parseStringScreen(){
+	string icommand;
+	bool alreadyParsed = false;
+
+	#ifdef __linux__
+		system("clear");
+	#else
+		system("cls");
+	#endif
+
+	set_h_w();
+	
+	int i;
+	prt_t_header();
+	greeting(name);
+	if(terminal_width<115){
+		std::cout<<'\n';
+	}
+	else std::cout<<"\n\n";
+	for(i=0;i<(terminal_width/2 - 3); i++) std::cout<<' ';
+	getline( std::cin, icommand );
+	if(icommand[0] == ':' ){
+		if ( icommand == ":exit" )
+			return;
+		else if( icommand == ":test" ){	//USER can get to test mode from here also, other than editing the sourcecode to change the macro 'testMode'
+				testModeScreen();
+				alreadyParsed = true;
+		}
+		//have conditions to check for commands
+		/*
+			Available Commands-
+				:exit or :q or :quit
+				:settings
+				:tt     //display current tt
+				:ttadv	//tt manager
+				:records //overall
+				:irecords //list coursecodes... select among them for individual records
+				:irecord:CS1401 //Case-INsensitive //Directly displays individual records of CS1401
+				:l or :list //lists all courses today
+		*/
+	}
+	else {
+		if(!alreadyParsed){
+			try{
+				parseInput(icommand);
+			}
+			catch(char *s){
+				std::cout<<s;
+			}
+		}
+		else{
+			return;
+		}
+	/*ONLY AFTER SUCCESS of ParseInput()*/
+//		vibrate("Records Updated!");
+		std::cout<<"\nPress any key to continue...  ";
+		std::cout<<std::endl;
+		char ignoreChar;
+		std::cin>>std::noskipws>>ignoreChar;
 	}
 }
 
@@ -487,9 +602,14 @@ int main(int argc, char const *argv[]){
 	set_h_w();
 	
 	a_register all_records;
-	all_records.set_up_TestMode();
-//	all_records.RECOVERconfig();
-//	all_records.ensure_InitStatus();
+
+	if(testMode == true){
+		all_records.testModeScreen();
+		return 0;
+	}
+
+	all_records.RECOVERconfig();
+	all_records.ensure_InitStatus();
 
 	prt_t_header();
 	greeting(name);
@@ -502,18 +622,9 @@ int main(int argc, char const *argv[]){
 	if(icommand[0] == ':' ){
 		if ( icommand == ":exit" )
 			return 0;
-		//have conditions to check for commands
-		/*
-			Available Commands-
-				:exit or :q or :quit
-				:settings
-				:tt     //display current tt
-				:ttadv	//tt manager
-				:records //overall
-				:irecords //list coursecodes... select among them for individual records
-				:irecord:CS1401 //Case-INsensitive //Directly displays individual records of CS1401
-				:l or :list //lists all courses today
-		*/
+		else if( icommand == ":test" ){
+				all_records.testModeScreen();
+		}
 	}
 	else {
 		try{
@@ -522,8 +633,6 @@ int main(int argc, char const *argv[]){
 		catch(char *s){
 			std::cout<<s;
 		}
-	/*ONLY AFTER SUCCESS of ParseInput()*/
-//		vibrate("Records Updated!");
 		std::cout<<"\nPress any key to continue...  ";
 		std::cout<<std::endl;
 		char ignoreChar;
@@ -632,6 +741,7 @@ void magnify(string pos, string *small_str, string *big_str){	//FUTURE - pos may
         	for(j=0;j<spac+msglen-1;j++) std::cout<<" ";
         	for(k=0;k<big_str->size();k++){
             	if((*big_str)[k]==' ') std::cout<<"   ";
+				else if((*big_str)[k] == '?')	std::cout<<bigChar[26][i];
             	else std::cout<<bigChar[(int)((*big_str)[k])-65][i];
             	std::cout<<" ";
         	}
@@ -642,12 +752,14 @@ void magnify(string pos, string *small_str, string *big_str){	//FUTURE - pos may
         	for(j=0;j<spac;j++) std::cout<<" ";
         	for(k=0;k<small_str->size();k++){
             	if((*small_str)[k]==' ') std::cout<<' ';
+				else if((*small_str)[k] == '?')	std::cout<<smallChar[26][i];
             	else std::cout<<smallChar[(int)((*small_str)[k])-65][i-4];
             	std::cout<<' ';
         	}
         	std::cout<<"   ";
         	for(k=0;k<big_str->size();k++){
             	if((*big_str)[k]==' ') std::cout<<"   ";
+				else if((*big_str)[k] == '?')	std::cout<<bigChar[26][i];
             	else std::cout<<bigChar[(int)((*big_str)[k])-65][i];
             	std::cout<<' ';
         	}
@@ -660,12 +772,14 @@ void magnify(string pos, string *small_str, string *big_str){	//FUTURE - pos may
         	for(j=0;j<spac;j++) std::cout<<" ";
         	for(k=0;k<small_str->size();k++){
             	if((*small_str)[k]==' ') std::cout<<' ';
+				else if((*small_str)[k] == '?')	std::cout<<smallChar[26][i];
             	else std::cout<<smallChar[(int)((*small_str)[k])-65][i];
             	std::cout<<' ';
         	}
         	std::cout<<"   ";
         	for(k=0;k<big_str->size();k++){
             	if((*big_str)[k]==' ') std::cout<<"   ";
+				else if((*big_str)[k] == '?')	std::cout<<smallChar[26][i];
             	else std::cout<<smallChar[(int)((*big_str)[k])-65][i];
             	std::cout<<' ';
         	}
@@ -685,6 +799,7 @@ void magnify(string pos, string *big_str){	//FUTURE - pos maybe "start","mid","e
 		for(j =0 ; j<spac ;j++) std::cout<<' ';
     	for(k=0;k<big_str->size();k++){
         	if((*big_str)[k]==' ') std::cout<<"   ";
+			else if((*big_str)[k] == '?')	std::cout<<bigChar[26][i];
         	else std::cout<<bigChar[(int)((*big_str)[k])-65][i];
         	std::cout<<" ";
     	}
@@ -703,6 +818,7 @@ void smaller_magnify(string pos, string *small_str){	//For understanding the rea
 		for(j=0;j<spac;j++) std::cout<<" ";
 		for(k=0;(*small_str)[k]!='\0';k++){
 	    	if((*small_str)[k]==' ') std::cout<<' ';
+			else if((*small_str)[k] == '?')	std::cout<<smallChar[26][i];
 	    	else std::cout<<smallChar[(int)((*small_str)[k])-65][i];
 	    	std::cout<<' ';
 		}
@@ -787,7 +903,7 @@ timetable::timetable(){
 			daylist new_day;
 			int i=ndays;
 			while(i--){
-				day.emplace_back(new_day);
+				days.emplace_back(new_day);
 			}
 			total_courses=0;
 			string dayname;
@@ -801,16 +917,15 @@ timetable::timetable(){
 					case 5: dayname = "Saturday"; break;
 					case 6: dayname = "Sunday"; break;
 				}
-				day[i].set_Day(dayname);
+				days[i].set_Day(dayname);
 			}
-			savefile = "BinaryTimeTable.dat";
+			save_TTFile = "BinaryTimeTable.dat";
 			txtfile = "TimeTable.txt";
-			recallfile = "BinaryTimeTable.dat";
 }
 
 timetable::~timetable(){
 	for(int i=0; i<ndays; i++)
-		day[i].~daylist();
+		days[i].~daylist();
 }
 
 int timetable::mainmenu(bool mainmenu_retval){
@@ -872,7 +987,7 @@ int timetable::mainmenu(bool mainmenu_retval){
 		case 3: save_to_binary(); break;
 		case 4: display();
 				return 0; break;	//return 0, since both of these give option to go back to mainmenu()
-		case 5: savetxt();
+		case 5: saveTXT();
 				std::cout<<"\nSaved to the file : "<<txtfile; break;
 		case 6: settings();
 				return 0; break;
@@ -899,39 +1014,33 @@ void timetable::settings(){
 		std::cout<<"\nSETTINGS\n---------\n"
 		    <<"\n1. Change name of save_file"
 		    <<"\n2. Change name of save_txtfile"
-		    <<"\n3. Change name of loadfrom_file"
-		    <<"\n4. Change number of days to store"
-		    <<"\n5. Change department/group name"
-		    <<"\n6. Go to Main Menu"
-		    <<"\nWhat do you want to (1-6)? ";
+		    <<"\n3. Change number of days to store"
+		    <<"\n4. Change department/group name"
+		    <<"\n5. Go to Main Menu"
+		    <<"\nWhat do you want to (1-5)? ";
 		std::cin>>ch;
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max() , '\n');
 		std::cout<<"\n\n";
 		switch(ch){
 			case 1: std::cout<<"Enter name of save_file : \n";
-				getline (std::cin, savefile);
+				getline (std::cin, save_TTFile);
 				std::cout<<"DONE!";
 				break;
 			case 2: std::cout<<"Enter name of txt_file:\n";
 				getline (std::cin, txtfile);
 				std::cout<<"DONE!";
 				break;
-			case 3: std::cout<<"Enter name of loadfrom_file (Source) : \n";
-
-				getline (std::cin, recallfile);
-				std::cout<<"DONE!";
-				break;
-			case 4: std::cout<<"Enter Number of Days to store in Timetable : ";
+			case 3: std::cout<<"Enter Number of Days to store in Timetable : ";
 				std::cin>>ndays;
 				std::cout<<"DONE!";
 				break;
-			case 5: std::cout<<"Department : \nCurrent - "<<dept<<"\nNew - ";
+			case 4: std::cout<<"Department : \nCurrent - "<<dept<<"\nNew - ";
 				getline (std::cin, dept);
 				std::cout<<"\nGroup : ";
 				getline (std::cin, grp);
 				std::cout<<"DONE!";
 				break;
-			case 6: mainmenu();
+			case 5: mainmenu();
 					return; break;	/*QUESTION - This won't EVER return control to here... is it OK?*/
 			}
 			std::cout<<"\nEnter any key to chose different action...";
@@ -952,7 +1061,7 @@ void timetable::fill(){
 			case 5: std::cout<<"Saturday\n--------\n"; break;
 			case 6: std::cout<<"Sunday\n------\n"; break;
 		}
-		day[i].make_tlist();
+		days[i].make_tlist();
 		i++;
 
 		/*FUTURE - std::cout<<"\nAny Special notes for this day (1 or 0)? "; */
@@ -965,8 +1074,8 @@ void timetable::fill(){
 void timetable::set_total_courses(){
 	for(int i=0;i<ndays;i++){
 		for(int j=0;j<8;j++){
-			if(day[i].tpoints[j] == NULL) continue;
-			const string sptr = day[i].tpoints[j]->get_coursecode();
+			if(days[i].tpoints[j] == NULL) continue;
+			const string sptr = days[i].tpoints[j]->get_coursecode();
 			if(find( distinct_courses.begin(), distinct_courses.end(), sptr ) == distinct_courses.end()){	//will be true if not found
 				distinct_courses.push_back(sptr);
 				++total_courses;
@@ -975,8 +1084,243 @@ void timetable::set_total_courses(){
 	}
 }
 
+void timetable::display(){
+	refresh_time();
 
-void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!!
+	int box_length, maxStrLen = 0;
+	int i, j;
+
+	#ifdef __linux__
+		system("clear")
+	#else
+		system("cls");
+	#endif
+
+	prt_t_header();
+	std::cout<<"\n\n";
+
+	if( days.size() == 0){
+		set_h_w();
+
+		std::cout<<' ';
+		for(i=0; i<terminal_width-2; ++i)	std::cout<<'-';
+
+		std::cout<<'|';
+		for(i=0; i<(terminal_width - 5)/2; ++i)	std::cout<<' ';
+		std::cout<<"EMPTY";
+		for(i=0; i<terminal_width - (terminal_width - 5)/2; ++i)	std::cout<<' ';
+		std::cout<<'|';
+
+		for(i=0; i<terminal_width-2; ++i)	std::cout<<'-';
+	}
+
+	else{	//This block prints the table
+		for(i=0; i<ndays; i++){
+			if( ret_day(i)->getmaxCCLen() > maxStrLen ){
+				maxStrLen = ret_day(i)->getmaxCCLen();
+			}
+		}
+
+		box_length = 2*(int)ret_day(0)->class_length + maxStrLen + 2*int(maxStrLen/3) + 1;
+
+		for(i=0; i<(14 + (int)((ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length)*box_length + 11 + (int)((ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length)*box_length + 1); ++i){
+			std::cout<<'\\';			
+		}
+		std::cout<<std::endl;
+		for(i=0; i<(14 + (int)((ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length)*box_length + 11 + (int)((ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length)*box_length + 1); ++i){
+			std::cout<<'\\';			
+		}
+		std::cout<<std::endl;
+
+		//1st line
+		std::cout<<"||    Day    |";
+		float tmp_time = ret_day(0)->class_start;
+		//for time before recess
+		for(i=0; i<(ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length; ++i){
+			std::cout<<int(tmp_time)<<':';	if(int((fmod(tmp_time,1)*60))>9)	std::cout<<int((fmod(tmp_time,1)*60));
+										else	std::cout<<'0'<<int((fmod(tmp_time,1)*60));
+			for(j=0; j<(box_length - 6); ++j)	std::cout<<' ';
+			if(int(tmp_time)<10)	std::cout<<" |";
+			else
+			{
+				std::cout<<'|';
+			}
+			tmp_time += ret_day(0)->class_length;
+		}
+
+		//recess_block
+		std::cout<<int(ret_day(0)->recess_start)<<':';	if(int(fmod(ret_day(0)->recess_start, 1)*60) > 9)	std::cout<<int(fmod(ret_day(0)->recess_start, 1)*60);
+													else
+													{
+														std::cout<<'0'<<int(fmod(ret_day(0)->recess_start, 1)*60);
+													}
+		for(j=0; j<5; ++j)	std::cout<<' ';
+		if(int(ret_day(0)->recess_start)<10)	std::cout<<' ';
+		std::cout<<'|';
+
+		//for time after recess
+		tmp_time = ret_day(0)->recess_end;
+		for(i=0; i<(ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length; ++i){
+			std::cout<<int(tmp_time)<<':';	if(int((fmod(tmp_time,1)*60))>9)	std::cout<<int((fmod(tmp_time,1)*60));
+										else	std::cout<<'0'<<int((fmod(tmp_time,1)*60));
+			for(j=0; j<(box_length - 6); ++j)	std::cout<<' ';
+			if(int(tmp_time)<10)	std::cout<<" |";
+			else
+			{
+				std::cout<<'|';
+			}
+			tmp_time += ret_day(0)->class_length;
+		}
+		std::cout<<'|'<<std::endl;
+
+		/*2nd Line*/
+		std::cout<<"||           |";
+		tmp_time = ret_day(0)->class_start + ret_day(0)->class_length;
+		//for time before recess
+		for(i=0; i<(ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length; ++i){
+			if(int(tmp_time)<10)	std::cout<<' ';
+			for(j=0; j<(box_length - 6); ++j)	std::cout<<' ';
+			std::cout<<int(tmp_time)<<':';	if(int((fmod(tmp_time,1)*60))>9)	std::cout<<int((fmod(tmp_time,1)*60));
+										else	std::cout<<'0'<<int((fmod(tmp_time,1)*60));
+			std::cout<<'|';
+			tmp_time += ret_day(0)->class_length;
+		}
+
+		//recess_block
+		if(int(ret_day(0)->recess_end)<10)	std::cout<<' ';
+		for(j=0; j<5; ++j)	std::cout<<' ';
+		std::cout<<int(ret_day(0)->recess_end)<<':';	if(int(fmod(ret_day(0)->recess_end, 1)*60) > 9)	std::cout<<int(fmod(ret_day(0)->recess_end, 1)*60);
+													else
+													{
+														std::cout<<'0'<<int(fmod(ret_day(0)->recess_end, 1)*60);
+													}
+		std::cout<<'|';
+
+		//for time after recess
+		tmp_time = ret_day(0)->recess_end + ret_day(0)->class_length;
+		for(i=0; i<(ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length; ++i){
+			if(int(tmp_time)<10)	std::cout<<' ';
+			for(j=0; j<(box_length - 6); ++j)	std::cout<<' ';
+			std::cout<<int(tmp_time)<<':';	if(int((fmod(tmp_time,1)*60))>9)	std::cout<<int((fmod(tmp_time,1)*60));
+										else	std::cout<<'0'<<int((fmod(tmp_time,1)*60));
+			std::cout<<'|';
+			tmp_time += ret_day(0)->class_length;
+		}
+		std::cout<<'|'<<std::endl<<"||";
+		for(i=0; i<(14 + (int)((ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length)*box_length + 11 + (int)((ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length)*box_length - 3); ++i){
+			std::cout<<'-';			
+		}
+		std::cout<<"||"<<std::endl;
+		
+		/*Setting value of recess, and calling set_tpoints*/	//NOTE_NOT_NEEDED - Calling set_tpoints() may not be needed here
+		vector<string> v;
+		v.reserve(6);
+		if( days.size() == 5 ){
+			v.push_back("B");
+			v.push_back("R");
+			v.push_back("E");
+			v.push_back("A");
+			v.push_back("K");
+
+			for(i=0; i<5; ++i){
+				ret_day(i)->set_tpoints();
+				ret_day(i)->tpoints[(ret_day(i)->recess_start - ret_day(i)->class_start)/ret_day(i)->class_length]->change_coursecode(v[i]);
+			}
+		}
+		else if( days.size() == 6){
+			v.clear();
+			v.push_back("R");
+			v.push_back("E");
+			v.push_back("C");
+			v.push_back("E");
+			v.push_back("S");
+			v.push_back("S");
+
+			for(i=0; i<6; ++i){
+				ret_day(i)->set_tpoints();
+				ret_day(i)->tpoints[(ret_day(i)->recess_start - ret_day(i)->class_start)/ret_day(i)->class_length]->change_coursecode(v[i]);
+			}
+
+		}
+		else{
+			for(i=0; i<days.size(); ++i){
+				ret_day(i)->set_tpoints();
+				ret_day(i)->tpoints[(ret_day(i)->recess_start - ret_day(i)->class_start)/ret_day(i)->class_length]->change_coursecode("-");
+			}
+		}
+
+		for(i=0; i<days.size(); ++i){	//Now printing daywise	[It is too much short :-)]
+			std::cout<<"||";
+			std::cout<<days[i].get_Day();
+			for(j=0; j<(11 - days[i].get_Day().size()); ++j)	std::cout<<' ';
+			std::cout<<'|';
+
+			//The courses
+			for(timebox* box : days[i].tpoints){
+				if(box->box_type == true){
+					for(j=0; j<(box_length - box->get_coursecode().size() - 1)/2; ++j)	std::cout<<' ';
+					std::cout<<box->get_coursecode();
+					for(j=0; j<(box_length - box->get_coursecode().size() - 1) - (box_length - box->get_coursecode().size() - 1)/2; ++j)	std::cout<<' ';
+					std::cout<<'|';
+				}
+				else{
+					std::cout<<"     "<<box->get_coursecode()<<"    |";
+				}
+			}
+			std::cout<<'|'<<std::endl<<"||           |";
+			for(j=0; j<(ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length; ++j){
+				int k=0;
+				for(k=0; k<box_length-1; ++k)	std::cout<<' ';
+				std::cout<<'|';
+			}
+
+			std::cout<<"          |";
+
+			for(j=0; j<(ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length; ++j){
+				int k=0;
+				for(k=0; k<box_length-1; ++k)	std::cout<<' ';
+				std::cout<<'|';
+			}
+			std::cout<<'|'<<std::endl;			
+		}		
+
+		for(i=0; i<(14 + (int)((ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length)*box_length + 11 + (int)((ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length)*box_length + 1); ++i){
+			std::cout<<'\\';			
+		}
+		std::cout<<std::endl;
+		for(i=0; i<(14 + (int)((ret_day(0)->recess_start - ret_day(0)->class_start)/ret_day(0)->class_length)*box_length + 11 + (int)((ret_day(0)->class_end - ret_day(0)->recess_end)/ret_day(0)->class_length)*box_length + 1); ++i){
+			std::cout<<'\\';			
+		}
+		std::cout<<std::endl;
+
+	}
+
+	std::cout<<"\n\nTimeTable Printed!!\n\n";
+
+	char ignoreChar;
+	if( testMode == true ){
+		std::cout<<"Press 'Enter' to continue to the parseStringScreen... ";
+		std::cin>>std::noskipws>>ignoreChar;
+		return;
+	}
+	else{
+		int choice;
+		do{
+			std::cout<<"\nWhat Next?\n1. Save to text file\n2. Go back to Main Menu\n";
+			std::cin>>choice;
+		}while(choice !=1 && choice != 2);
+
+		if(choice == 1){
+			saveTXT();
+			std::cout<<"Saved to "<<txtfile;
+		}
+		else{
+			mainmenu();
+		}
+	}
+}
+
+//void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!!
 							//Previous one used array, now working directly with the pointers
 
 /**FUTURE - a) With graphics use, highlight timetable of current day
@@ -992,7 +1336,7 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 	 * 	    better will be that contoarray provides other ways to tell us if it has passed a [6][8] or [7][8] array...
 	 * 	    maybe by uupdating data member in the class, named ndays*/
 
-	refresh_time();
+/*	refresh_time();
 	
 	#ifdef __linux__
 		system("clear");
@@ -1038,7 +1382,7 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 		switch(i){			//switch block  prints the day name
 			case 0: std::cout<<"Monday     "; break;
 			case 1: std::cout<<"Tuesday    "; break;
-			case 2: std::cout<<"Wednesday  "; break;
+			case 2: std::cout<<"Wednesdayas"; break;
 			case 3: std::cout<<"Thursday   "; break;
 			case 4: std::cout<<"Friday     "; break;
 			case 5: std::cout<<"Saturday   "; break;
@@ -1096,6 +1440,11 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 		std::cout<<'-';
 	std::cout<<"\n\nTimeTable Printed!!\n";
 	int ch;
+
+	if(testMode == true){
+		return;
+	}
+
 	do{
 		std::cout<<"\nWhat Next?\n1. Save to text file\n2. Go back to main menu\n";
 		std::cin>>ch;
@@ -1104,27 +1453,24 @@ void timetable::display(){	//WHOLLY REVAMPED DISPLAY() Function... from Scratch!
 		}
 	}while(ch!=1 && ch!=2);
 
-	if(ch==1)	savetxt();
+	if(ch==1)	saveTXT();
 	else{	//This will surely be ch=2... since all other numbers have been managed by do-while loop
 		mainmenu();
 	}
-	return;	//To Continue the chain reaction that ends up closing mainmenu() whenever it returns false;
+	//To Continue the chain reaction that ends up closing mainmenu() whenever it returns false;
 }	//End of Display Function
-
+*/
 void timetable::save_to_binary(){
 	std::ofstream fsave;
-	fsave.open( savefile , std::ios::binary|std::ios::out);
+	fsave.open( save_TTFile , std::ios::binary|std::ios::out);
 	fsave.write((char*)&state,sizeof(state));	//state is lesser bytes than char, but the &state and char* will be same size, and for the bytes saved in file, it will save 1 byte, due to that sizeof()	
 	fsave.write((char*)&ndays,sizeof(ndays));
-	size_t len = savefile.size() +1;
+	size_t len = save_TTFile.size() +1;
 	fsave.write((char*)&len,sizeof(len));
-	fsave.write(savefile.c_str(),len*sizeof(char));
+	fsave.write(save_TTFile.c_str(),len*sizeof(char));
 	len = txtfile.size() +1;
 	fsave.write((char*)&len,sizeof(len));
 	fsave.write(txtfile.c_str(),len*sizeof(char));
-	len = recallfile.size() +1;
-	fsave.write((char*)&len,sizeof(len));
-	fsave.write(recallfile.c_str(),len*sizeof(char));
 	len = dept.size() +1;
 	fsave.write((char*)&(len),sizeof(len));
 	fsave.write(dept.c_str(),len*sizeof(char));
@@ -1133,14 +1479,18 @@ void timetable::save_to_binary(){
 	fsave.write(grp.c_str(),len*sizeof(char));
 	fsave.write((char*)&total_courses,sizeof(total_courses));
 	for(int i=0;i<ndays;++i)
-		day[i].save_to_binary(&fsave);
+		days[i].save_to_binary(&fsave);
 	std::cout<<"End of timetable save!\n";
 	fsave.close();
 }
 
 void timetable::load_from_binary(){
 	std::ifstream f_recall;
-	f_recall.open( recallfile ,std::ios::binary|std::ios::in);
+
+	if( save_TTFile == "" )
+		return;
+
+	f_recall.open( save_TTFile ,std::ios::binary|std::ios::in);
 	f_recall.read((char*)&state, sizeof(state));
 	f_recall.read((char*)&ndays,sizeof(ndays));
 	//instead of auto, replastd::cing with size_t
@@ -1149,17 +1499,12 @@ void timetable::load_from_binary(){
 	f_recall.read((char*)&len,sizeof(len));	//len was random here... as big as hell, and also 0
 	cstr = new char[len];
 	f_recall.read(cstr,len*sizeof(char));	//it couldn't read cstr
-	savefile = cstr;
+	save_TTFile = cstr;
 	delete[] cstr;
 	f_recall.read((char*)&len,sizeof(len));
 	cstr = new char[len];
 	f_recall.read(cstr,len*sizeof(char));
 	txtfile = cstr;
-	delete[] cstr;
-	f_recall.read((char*)&len,sizeof(len));
-	cstr = new char[len];
-	f_recall.read(cstr,len*sizeof(char));
-	recallfile = cstr;
 	delete[] cstr;
 	f_recall.read((char*)&(len),sizeof(len));
 	cstr = new char[len];
@@ -1173,12 +1518,14 @@ void timetable::load_from_binary(){
 	delete[] cstr;
 	f_recall.read((char*)&total_courses,sizeof(total_courses));
 	for(int i=0;i<ndays;++i)
-		day[i].load_from_binary(&f_recall);
+		days[i].load_from_binary(&f_recall);
 	std::cout<<"End of timetable LOAD!\n";
 	f_recall.close();
+
+	state = true;
 }
 
-void timetable::savetxt(){
+void timetable::saveTXT(){
 	std::ofstream fout;
 	fout.open( txtfile , std::ios::out|std::ios::trunc );
 	int i=0, j=0, k=0;
@@ -1287,8 +1634,8 @@ vector<vector<string>> timetable::contoarray(){	//Returning 2D array... MAY FAIL
 	
 	for(int i=0;i<ndays;i++)
 		for(int j=0;j<8;j++){
-            if(day[i].tpoints[j])
-			    retarr[i][j]=day[i].tpoints[j]->get_coursecode();
+            if(days[i].tpoints[j])
+			    retarr[i][j]=days[i].tpoints[j]->get_coursecode();
             else retarr[i][j]="NULL"; }
 	return retarr;
 }
@@ -1299,7 +1646,7 @@ daylist* timetable::ret_day(int dayn){
 		//My error handling... since if NULL is returned, and accessed it may cause Segmentation Fault
 		std::cout<<"Invalid Input Passed... Destructing Nodes, to prevent memory leak...";
 		for(int i=0; i<ndays; i++)
-			day[i].~daylist();
+			days[i].~daylist();
 		std::cout<<"Exiting...";
 		//~timetable();		//Couldn't Call Destructor... no match for 'operator~'
 		delete this;
@@ -1307,15 +1654,16 @@ daylist* timetable::ret_day(int dayn){
 		//All destructed... seems safe, but IMPROVE IT (maybe using try, throw and catch)
 		return NULL;
 	}
-	else return &day[dayn];
+	else return &days[dayn];
 }
 
 daylist::daylist(){
-			class_start = 8.5;
-			class_end = 17.5;
-			recess_start = 12.5;
-			recess_end = 13.5;
-			class_length = 1;
+	numBox = 0;
+	class_start = 8.5;
+	class_end = 17.5;
+	recess_start = 12.5;
+	recess_end = 13.5;
+	class_length = 1;
 }
 
 daylist::~daylist(){
@@ -1355,6 +1703,9 @@ void timebox::set_sub(){
 
 void daylist::set_tpoints(){	//NOTE - only used by display function, else no hinderance to supporting CUSTOM Boxes, BUT it does change class_end and recess_start
 //	int org_recess_start = recess_start, org_class_end = class_end ;
+
+	tpoints.clear();
+
 	if(ceil((recess_start - class_start)/class_length) != int((recess_start - class_start)/class_length)){
 		recess_start -= fmod(recess_start - class_start,class_length);
 	}
@@ -1383,8 +1734,8 @@ void daylist::set_tpoints(){	//NOTE - only used by display function, else no hin
 			for(k=0; k<j; ++k){
 				tpoints[int((timelist[i].starttime - recess_end + recess_start - class_start)/class_length) + k + 1] = &timelist[i];	//[DEBUG] Check if the '+1' I added is consistent with other cases too, like length 2 hours etc???
 				if(tpoints.size() < int((timelist[i].starttime - recess_end + recess_start - class_start)/class_length) + k){
-					cout<<"Size is smaller";
-					cout<<endl;
+					std::cout<<"Size is smaller";
+					std::cout<<std::endl;
 				}
 			}
 		}
@@ -1448,6 +1799,7 @@ void daylist::make_tlist(){
 				}
 		}
 	}
+	numBox = timelist.size();
 	set_tpoints();
 }
 
@@ -1492,8 +1844,8 @@ void daylist::set_Testmode_tlist(){
 			timelist.push_back(new_box);
 		}
 	}
+	numBox = timelist.size();
 	set_tpoints();
-
 }
 
 void daylist::save_to_binary(std::ofstream* fsave){
@@ -1553,6 +1905,7 @@ void daylist::load_from_binary(std::ifstream* f_recall){
 		timelist.push_back(new_box);
 	}
 
+	numBox = timelist.size();
 	set_tpoints();
 }
 
@@ -1672,7 +2025,7 @@ void a_register::set_total_today_array(){
 					irecbox new_rec_box;
 					new_rec_box.change_coursecode(the_day->tpoints[j]->get_coursecode());
 					records_list.push_back(new_rec_box);
-//					cout<<"[DEBUG]Size of Records_List - "<<records_list.size()<<endl;
+//					std::cout<<"[DEBUG]Size of Records_List - "<<records_list.size()<<std::endl;
 				}
 			}
 		}
@@ -1688,14 +2041,14 @@ void a_register::set_total_today_array(){
 				if( the_day->tpoints[j]->box_type == false )
 					continue;
 				if( !already_present_in_todaylist( the_day->tpoints[j]->get_coursecode() )){
-//					cout<<"[DEBUG]Reached inside for the coursecode - "<<the_day->tpoints[j]->get_coursecode()<<endl;
+//					std::cout<<"[DEBUG]Reached inside for the coursecode - "<<the_day->tpoints[j]->get_coursecode()<<std::endl;
 					irecbox *rec_box_ptr = NULL;
 					rec_box_ptr = find_irecbox( the_day->tpoints[j]->get_coursecode());
 					if(rec_box_ptr != NULL){
 						todaylist.push_back(rec_box_ptr);
 					}
 					else{
-//						cout<<"[DEBUG]rec_box is NULL for "<<the_day->tpoints[j]->get_coursecode()<<endl;
+//						std::cout<<"[DEBUG]rec_box is NULL for "<<the_day->tpoints[j]->get_coursecode()<<std::endl;
 					}
 				}
 			}
@@ -1705,14 +2058,25 @@ void a_register::set_total_today_array(){
 }
 
 a_register::a_register(){
+	setup_complete = false;
 	num_SavedTimetables = 0;
-	setup_complete = true;
+	last_savedRecords = "";
+	last_savedTTFile = "";
+	user_name = "Kaun";
+
+	if(RECOVERconfig() == true){
+		setup_complete = true;
+	}
+	else{
+		newWelcome();
+	}
 }
 
 a_register::~a_register(){
 }
 
-void a_register::RECOVERconfig(){
+bool a_register::RECOVERconfig(){	//NOTE - It returns true if it finds a username, and a linked timetable, thats it!
+									//		For the records file, it will try to find it, but if need be, will just create a new file, and use the methods of a_register
 	//TRIAL
-	setup_complete = true;
+	return false;
 }
